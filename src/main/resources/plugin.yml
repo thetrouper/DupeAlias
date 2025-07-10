@@ -1,0 +1,61 @@
+name: DupeAlias
+version: '0.0.1'
+main: me.trouper.dupealias.DupeAlias
+api-version: '1.21'
+prefix: DupeAlias
+authors: [ obvWolf ]
+description: A powerful dupe plugin with niche features for creating unique servers.
+commands:
+  dupealias:
+    description: A command to manage the plugin.
+    permission: dupealias.admin
+    usage: none
+    aliases:
+      - da
+  dupe:
+    description: A command to duplicate items.
+    permission: dupealias.dupe
+    usage: /dupe [gui|<integer>]
+permissions:
+  dupealias.admin:
+    description: Allows access to the /dupealias admin command.
+    default: op
+  dupealias.final.bypass:
+    description: Allows the bypassing of final item restrictions
+  dupealias.protected.bypass:
+    description: Allows the bypassing of protected item restrictions
+  dupealias.unique.bypass:
+    description: Allows the duping of unique items
+  dupealias.dupe:
+    description: Allows duplication of items through the command.
+    default: true
+    children:
+      dupealias.dupe.cooldownbypass: op
+  dupealias.dupe.cooldownbypass:
+    description: Bypass the cooldown for /dupe
+    default: op
+  dupealias.infinite:
+    description: Allows the use of items tagged as "infinite".
+    default: true
+  dupealias.gui:
+    description: Allows access to the full dupe GUI.
+    default: true
+    children:
+      dupealias.gui.replicator: true
+      dupealias.gui.inventory: true
+      dupealias.gui.chest: true
+  dupealias.gui.replicator:
+    description: The gui which lets you shift click copies of a single item.
+    default: true
+    children:
+      dupalias.gui.replicator.keep: op
+  dupealias.gui.inventory:
+    description: The gui which shows your inventory and armor on top.
+    default: true
+    children:
+      dupalias.gui.inventory.keep: op
+  dupealias.gui.chest:
+    description: A gui which items can be put in and taken out as copies.
+    default: true
+    children:
+      dupalias.gui.chest.keep: op
