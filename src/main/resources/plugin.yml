@@ -22,15 +22,18 @@ permissions:
     default: op
   dupealias.final.bypass:
     description: Allows the bypassing of final item restrictions
+    default: op
   dupealias.protected.bypass:
     description: Allows the bypassing of protected item restrictions
+    default: op
   dupealias.unique.bypass:
     description: Allows the duping of unique items
+    default: op
   dupealias.dupe:
     description: Allows duplication of items through the command.
     default: true
     children:
-      dupealias.dupe.cooldownbypass: op
+      dupealias.dupe.cooldownbypass: false
   dupealias.dupe.cooldownbypass:
     description: Bypass the cooldown for /dupe
     default: op
@@ -48,14 +51,16 @@ permissions:
     description: The gui which lets you shift click copies of a single item.
     default: true
     children:
-      dupalias.gui.replicator.keep: op
+      dupealias.gui.replicator.keep: false # Controls if a player should keep their previous replicator session with items in it. This does not persist across reboots.
+      dupealias.gui.replicator.refresh.integerhere: false # Controls the time it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
   dupealias.gui.inventory:
     description: The gui which shows your inventory and armor on top.
     default: true
     children:
-      dupalias.gui.inventory.keep: op
+      dupealias.gui.inventory.refresh.integerhere: false # Controls the time it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
   dupealias.gui.chest:
     description: A gui which items can be put in and taken out as copies.
     default: true
     children:
-      dupalias.gui.chest.keep: op
+      dupealias.gui.chest.keep: false # Controls if a player should keep their previous chest session with items in it. This does not persist across reboots.
+      dupealias.gui.chest.refresh.integerhere: false # Controls the time it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.

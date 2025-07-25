@@ -2,20 +2,50 @@ package me.trouper.dupealias.server;
 
 import me.trouper.alias.utils.ItemBuilder;
 import me.trouper.dupealias.DupeContext;
+import me.trouper.dupealias.data.GlobalRule;
+import me.trouper.dupealias.data.ItemCapture;
 import me.trouper.dupealias.server.functions.UniqueCheck;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DupeManager implements DupeContext {
+
+    /**
+     * @return false if the item was modified.
+     */
+    public boolean verifyTag(ItemStack item) {
+        if (getNbtStorage().captures.isEmpty()) return true;
+        ItemCapture capture = getNbtStorage().getCapture(item);
+        if (capture == null) return true;
+        boolean modified = false;
+
+        for (Map.Entry<ItemTag, Boolean> tagEntry : capture.getTags().entrySet()) {
+            ItemTag tag = tagEntry.getKey();
+            boolean value = tagEntry.getValue();
+            boolean set = hasIndividualTag(item,tag);
+            if (set && checkIndividualTag(item,tag) == value) {
+                continue;
+            } else if (!set) {
+                setTag(item,tagEntry.getKey(),value);
+            } else {
+                removeTag(item,tag);
+                setTag(item,tag,value);
+            }
+
+            modified = true;
+        }
+
+        return !modified;
+    }
 
     public boolean isUnique(ItemStack item) {
         return !new UniqueCheck().passes(item);
@@ -31,99 +61,200 @@ public class DupeManager implements DupeContext {
         return Boolean.TRUE.equals(input.getPersistentDataContainer().get(tag.getKey(), PersistentDataType.BOOLEAN));
     }
 
-    public boolean checkGlobalTag(Material material, ItemTag tag) {
-        Set<ItemTag> tags = getConfig().globalMaterials.getOrDefault(material,new HashSet<>());
-        return tags.contains(tag);
-    }
-
     public boolean checkEffectiveTag(ItemStack input, ItemTag tag) {
         if (tag == null || input == null) return false;
         if (input.isEmpty()) return false;
+
         boolean set = hasIndividualTag(input,tag);
-        boolean global = getDupe().checkGlobalTag(input.getType(),tag);
-        boolean individual = Boolean.TRUE.equals(input.getPersistentDataContainer().get(tag.getKey(), PersistentDataType.BOOLEAN));
+        boolean individual = set && Boolean.TRUE.equals(input.getPersistentDataContainer().get(tag.getKey(), PersistentDataType.BOOLEAN));
 
+        // Check individual tag first
         if (set) return individual;
-        return global;
+
+        // Check global rules
+        return checkGlobalRuleTag(input, tag);
     }
 
-    public boolean addGlobalTag(Material material, ItemTag tag) {
-        Set<ItemTag> tags = getConfig().globalMaterials.getOrDefault(material,new HashSet<>());
-        boolean result = tags.add(tag);
-        getConfig().globalMaterials.put(material,tags);
-        getConfig().save();
-        return result;
+    /**
+     * Gets all global rules that apply to a given material
+     */
+    public List<GlobalRule> getApplicableRules(Material material) {
+        return getConfig().globalRules.stream()
+                .filter(rule -> {
+                    return switch (rule.materialMode) {
+                        case WHITELIST -> rule.effectedMaterials.contains(material);
+                        case BLACKLIST -> !rule.effectedMaterials.contains(material);
+                        case IGNORE -> true;
+                        default -> false;
+                    };
+                })
+                .toList();
     }
 
-    public boolean removeGlobalTag(Material material, ItemTag tag) {
-        Set<ItemTag> tags = getConfig().globalMaterials.getOrDefault(material,new HashSet<>());
-        boolean result = tags.remove(tag);
-        getConfig().globalMaterials.put(material,tags);
+
+    /**
+     * Gets all global rules that apply to a specific item
+     */
+    public List<GlobalRule> getMatchingRules(ItemStack item) {
+        return getConfig().globalRules.stream()
+                .filter(rule -> rule.doesMatch(item))
+                .toList();
+    }
+
+    /**
+     * Checks if any global rule applies this tag to the given item
+     */
+    public boolean checkGlobalRuleTag(ItemStack input, ItemTag tag) {
+        for (GlobalRule rule : getConfig().globalRules) {
+            if (rule.appliedTags.contains(tag) && rule.doesMatch(input)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Creates a new global rule that applies the specified tag to items matching the criteria
+     */
+    public GlobalRule createGlobalRule(ItemTag tag) {
+        GlobalRule rule = new GlobalRule();
+        rule.appliedTags.add(tag);
+        getConfig().globalRules.add(rule);
         getConfig().save();
-        return result;
+        return rule;
+    }
+
+    /**
+     * Removes all global rules that apply the specified tag to the specified material
+     */
+    public boolean removeGlobalRulesForMaterial(Material material, ItemTag tag) {
+        boolean removed = false;
+        Iterator<GlobalRule> iterator = getConfig().globalRules.iterator();
+
+        while (iterator.hasNext()) {
+            GlobalRule rule = iterator.next();
+            if (rule.appliedTags.contains(tag) &&
+                    (rule.materialMode == GlobalRule.MaterialMatchMode.WHITELIST && rule.effectedMaterials.contains(material))) {
+                iterator.remove();
+                removed = true;
+            }
+        }
+
+        if (removed) {
+            getConfig().save();
+        }
+        return removed;
+    }
+
+    /**
+     * Adds a global rule for a specific material and tag
+     */
+    public boolean addGlobalRuleForMaterial(Material material, ItemTag tag) {
+        // Check if rule already exists
+        for (GlobalRule rule : getConfig().globalRules) {
+            if (rule.appliedTags.contains(tag) &&
+                    rule.materialMode == GlobalRule.MaterialMatchMode.WHITELIST &&
+                    rule.effectedMaterials.contains(material)) {
+                return false; // Rule already exists
+            }
+        }
+
+        GlobalRule rule = new GlobalRule();
+        rule.materialMode = GlobalRule.MaterialMatchMode.WHITELIST;
+        rule.effectedMaterials.add(material);
+        rule.appliedTags.add(tag);
+        getConfig().globalRules.add(rule);
+        getConfig().save();
+        return true;
     }
 
     public boolean addTag(ItemStack item, ItemTag tag) {
-        if (hasIndividualTag(item,tag) && getDupe().checkIndividualTag(item,tag)) return false;
+        if (hasIndividualTag(item, tag) && getDupe().checkIndividualTag(item, tag)) return false;
+
         ItemBuilder builder = ItemBuilder.of(item);
-        builder.loreMiniMessage(getConfig().tagLore.get(tag));
+        builder.loreMiniMessage(getConfig().trueTagLore.get(tag));
         builder.modifyMeta(itemMeta -> {
-            itemMeta.getPersistentDataContainer().set(tag.getKey(), PersistentDataType.BOOLEAN,true);
+            itemMeta.getPersistentDataContainer().set(tag.getKey(), PersistentDataType.BOOLEAN, true);
             return itemMeta;
         });
 
         ItemStack result = builder.buildAndGet();
-
         item.setItemMeta(result.getItemMeta());
         return true;
     }
 
     public boolean removeTag(ItemStack item, ItemTag tag) {
         ItemBuilder builder = ItemBuilder.of(item);
-        if (hasIndividualTag(item,tag) && !checkIndividualTag(item,tag)) return false;
+
+        if (hasIndividualTag(item, tag) && !checkIndividualTag(item, tag)) return false;
+
+        builder.modifyMeta(itemMeta->{
+            if (itemMeta.hasLore()) {
+                removeTagLore(itemMeta,tag);
+            }
+
+            return itemMeta;
+        });
+
         try {
             builder.modifyMeta(itemMeta -> {
                 itemMeta.getPersistentDataContainer().remove(tag.getKey());
-                if (itemMeta.hasLore()) {
-                    List<Component> lore = item.lore();
-                    if (lore == null) return itemMeta;
-                    int lines = lore.size();
-                    for (int i = 0; i < lines - 1; i++) {
-                        for (Map.Entry<ItemTag, String> entry : getConfig().tagLore.entrySet()) {
-                            if (tag.equals(entry.getKey())) continue;
-                            String search = entry.getValue();
-                            String searchPlain = search.replaceAll("<[^>]+>", "");
-                            String componentPlain = PlainTextComponentSerializer.plainText().serialize(lore.get(i));
-                            if (componentPlain.equals(searchPlain)) {
-                                lore.remove(i);
-                                break;
-                            }
-                        }
-                    }
-                    itemMeta.lore(lore);
-                }
                 return itemMeta;
             });
         } catch (IllegalArgumentException ex) {
             return false;
         }
-        ItemStack result = builder.buildAndGet();
 
+        ItemStack result = builder.buildAndGet();
         item.setItemMeta(result.getItemMeta());
         return true;
     }
 
     public void setTag(ItemStack item, ItemTag tag, boolean value) {
         ItemBuilder builder = ItemBuilder.of(item);
-        if (value) builder.loreMiniMessage(getConfig().tagLore.get(tag));
+
         builder.modifyMeta(itemMeta -> {
-            itemMeta.getPersistentDataContainer().set(tag.getKey(), PersistentDataType.BOOLEAN,value);
+            if (itemMeta.hasLore()) {
+                removeTagLore(itemMeta,tag);
+            }
+            return itemMeta;
+        });
+
+        if (value && getConfig().trueTagLore.containsKey(tag)) {
+            builder.loreMiniMessage(getConfig().trueTagLore.get(tag));
+        } else if (!value && getConfig().falseTagLore.containsKey(tag)) {
+            builder.loreMiniMessage(getConfig().falseTagLore.get(tag));
+        }
+
+        builder.modifyMeta(itemMeta -> {
+            itemMeta.getPersistentDataContainer().set(tag.getKey(), PersistentDataType.BOOLEAN, value);
             return itemMeta;
         });
 
         ItemStack result = builder.buildAndGet();
-
         item.setItemMeta(result.getItemMeta());
+    }
+
+    public void removeTagLore(ItemMeta meta, ItemTag tag) {
+        List<Component> lore = meta.lore();
+        if (lore != null) {
+            List<String> removeLores = new ArrayList<>();
+            if (getConfig().trueTagLore.containsKey(tag)) {
+                removeLores.add(getConfig().trueTagLore.get(tag));
+            }
+            if (getConfig().falseTagLore.containsKey(tag)) {
+                removeLores.add(getConfig().falseTagLore.get(tag));
+            }
+
+            lore.removeIf(component -> {
+                String componentPlain = PlainTextComponentSerializer.plainText().serialize(component);
+                return removeLores.stream().anyMatch(loreStr ->
+                        componentPlain.equals(loreStr.replaceAll("<[^>]+>", ""))
+                );
+            });
+
+            meta.lore(lore);
+        }
     }
 
     public ItemTag getTag(NamespacedKey key) {
@@ -133,4 +264,23 @@ public class DupeManager implements DupeContext {
         throw new IllegalArgumentException("Invalid NameSpacedKey '%s'".formatted(key.value()));
     }
 
+    public int getPermissionValue(Player player, String rootPermission, int fallback) {
+        int lowestCooldown = Integer.MAX_VALUE;
+
+        for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+            String perm = permInfo.getPermission();
+
+            if (perm.startsWith(rootPermission)) {
+                String valueStr = perm.substring(rootPermission.length());
+                try {
+                    int value = Integer.parseInt(valueStr);
+                    if (value < lowestCooldown) {
+                        lowestCooldown = value;
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        return (lowestCooldown == Integer.MAX_VALUE) ? fallback : lowestCooldown;
+    }
 }

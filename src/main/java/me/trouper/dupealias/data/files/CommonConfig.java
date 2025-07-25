@@ -1,4 +1,4 @@
-package me.trouper.dupealias.data;
+package me.trouper.dupealias.data.files;
 
 import me.trouper.alias.data.Common;
 import me.trouper.alias.data.JsonSerializable;

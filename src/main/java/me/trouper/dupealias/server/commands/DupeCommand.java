@@ -37,7 +37,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
         }
 
         if (args.isEmpty()) {
-            if (dupeHeld(player,0)) {
+            if (dupeHeld(player,1)) {
                 dupeCooldown.setCooldown(player.getUniqueId(), getConfig().dupeCooldownMillis);
             } else {
                 dupeGui.openDefaultGui(player);
@@ -94,7 +94,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
         int baseCount = inHand.getAmount();
         int maxPerStack = inHand.getMaxStackSize();
 
-        for (int i = 0; i <= amount; i++) {
+        for (int i = 0; i <= amount - 1; i++) {
             int remaining = baseCount * (1 << i);
 
             while (remaining > 0) {
@@ -111,7 +111,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
             }
         }
 
-        int totalGiven = baseCount * ((1 << (amount + 1)) - 1);
+        int totalGiven = baseCount * ((1 << amount) - 1);
         successAny(player,"You have duplicated {0} items!", totalGiven);
         return true;
     }

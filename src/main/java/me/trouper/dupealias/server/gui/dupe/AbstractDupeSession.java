@@ -25,8 +25,6 @@ public abstract class AbstractDupeSession implements DupeContext {
 
     protected abstract void tick();
 
-    protected abstract long getTickDelay(Player player);
-
     private void startTicking() {
         if (replicationTask != null && !replicationTask.isCancelled()) {
             replicationTask.cancel();
@@ -42,7 +40,7 @@ public abstract class AbstractDupeSession implements DupeContext {
                 }
                 tick();
             }
-        }.runTaskTimer(getPlugin(), 0, getTickDelay(owner));
+        }.runTaskTimer(getPlugin(), 0, 1);
     }
 
     public void close() {

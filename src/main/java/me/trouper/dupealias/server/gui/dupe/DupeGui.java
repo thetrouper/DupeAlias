@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class DupeGui implements DupeContext, CommonItems {
 
-    public final ReplicatorGui replicatorGui = new ReplicatorGui();
+    public final DupeReplicatorGui replicatorGui = new DupeReplicatorGui();
     public final DupeInventoryGui inventoryGui  = new DupeInventoryGui();
     public final DupeChestGui chestGui = new DupeChestGui();
 
@@ -81,7 +81,7 @@ public class DupeGui implements DupeContext, CommonItems {
                 abstractDupeGui.getSession(player).getGui().open(player);
             } else {
                 getVerbose().send("Creating new session for {0}",player.getName());
-                player.openInventory(abstractDupeGui.createSession(player).open());
+                player.openInventory(abstractDupeGui.getSession(player).open());
             }
         } else {
             player.closeInventory();

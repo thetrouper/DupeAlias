@@ -14,7 +14,6 @@ public abstract class AbstractDupeGui<T extends AbstractDupeSession> implements 
     protected abstract T createSession(Player player);
 
     public T getSession(Player player) {
-        sessions.entrySet().removeIf(entry -> entry.getValue().isClosed());
         return sessions.computeIfAbsent(player.getUniqueId(), uuid -> createSession(player));
     }
 

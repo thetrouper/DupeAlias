@@ -7,7 +7,7 @@ import org.bukkit.persistence.PersistentDataType;
 public class UniqueCheck implements Check<ItemStack> {
     @Override
     public boolean passes(ItemStack input) {
-        boolean globallyUnique = getDupe().checkGlobalTag(input.getType(),ItemTag.UNIQUE);
+        boolean globallyUnique = getDupe().checkGlobalRuleTag(input,ItemTag.UNIQUE);
         boolean set = input.hasItemMeta() && input.getPersistentDataContainer().has(ItemTag.UNIQUE.getKey());
         boolean individuallyUnique = Boolean.TRUE.equals(input.getPersistentDataContainer().get(ItemTag.UNIQUE.getKey(), PersistentDataType.BOOLEAN));
 
