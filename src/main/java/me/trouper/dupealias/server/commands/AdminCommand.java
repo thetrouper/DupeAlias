@@ -183,7 +183,7 @@ public class AdminCommand implements QuickCommand, DupeContext {
                     GlobalRule rule = getConfig().globalRules.get(i);
                     StringBuilder tagList = new StringBuilder();
                     for (ItemTag tag : rule.appliedTags) {
-                        if (tagList.length() > 0) tagList.append(", ");
+                        if (!tagList.isEmpty()) tagList.append(", ");
                         tagList.append(tag.getName());
                     }
                     infoAny(sender, "  #{0}: Tags: {1}, Match Mode: {2}, Material Mode: {3}",
@@ -209,7 +209,7 @@ public class AdminCommand implements QuickCommand, DupeContext {
 
                     StringBuilder tagList = new StringBuilder();
                     for (ItemTag tag : removedRule.appliedTags) {
-                        if (tagList.length() > 0) tagList.append(", ");
+                        if (!tagList.isEmpty()) tagList.append(", ");
                         tagList.append(tag.getName());
                     }
 

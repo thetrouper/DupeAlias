@@ -1,4 +1,4 @@
-package me.trouper.dupealias.server.gui.dupe;
+package me.trouper.dupealias.server.gui.dupe.sub;
 
 import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.server.gui.CommonItems;

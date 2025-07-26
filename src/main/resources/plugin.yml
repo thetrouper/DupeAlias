@@ -14,12 +14,14 @@ commands:
       - da
   dupe:
     description: A command to duplicate items.
-    permission: dupealias.dupe
     usage: /dupe [gui|<integer>]
 permissions:
   dupealias.admin:
     description: Allows access to the /dupealias admin command.
     default: op
+  dupealias.infinite:
+    description: Allows the use of items tagged as "infinite".
+    default: true
   dupealias.final.bypass:
     description: Allows the bypassing of final item restrictions
     default: op
@@ -30,37 +32,33 @@ permissions:
     description: Allows the duping of unique items
     default: op
   dupealias.dupe:
-    description: Allows duplication of items through the command.
+    description: Allows duplication of items through the command. Setting this to false results in the /dupe command always displaying a GUI.
     default: true
     children:
-      dupealias.dupe.cooldownbypass: false
-  dupealias.dupe.cooldownbypass:
-    description: Bypass the cooldown for /dupe
-    default: op
-  dupealias.infinite:
-    description: Allows the use of items tagged as "infinite".
-    default: true
+      dupealias.dupe.cooldown.integerhere: false # Controls the cooldown time in ticks it will take to command dupe again.
+      dupealias.dupe.limit.integerhere: false # Controls the integer argument's limit for exponential (2^n) duping.
   dupealias.gui:
-    description: Allows access to the full dupe GUI.
+    description: Allows access to the main dupe GUI selector. Players do not need this permission to access subsequent GUIs through the dupe command arguments.
     default: true
     children:
       dupealias.gui.replicator: true
       dupealias.gui.inventory: true
       dupealias.gui.chest: true
   dupealias.gui.replicator:
-    description: The gui which lets you shift click copies of a single item.
+    description: An animated GUI which replicates a single input item.
     default: true
     children:
       dupealias.gui.replicator.keep: false # Controls if a player should keep their previous replicator session with items in it. This does not persist across reboots.
-      dupealias.gui.replicator.refresh.integerhere: false # Controls the time it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
+      dupealias.gui.replicator.refresh.integerhere: false # Controls the time in ticks it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
   dupealias.gui.inventory:
     description: The gui which shows your inventory and armor on top.
     default: true
     children:
-      dupealias.gui.inventory.refresh.integerhere: false # Controls the time it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
+      dupealias.gui.inventory.refresh.integerhere: false # Controls the time in ticks it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
   dupealias.gui.chest:
     description: A gui which items can be put in and taken out as copies.
     default: true
     children:
       dupealias.gui.chest.keep: false # Controls if a player should keep their previous chest session with items in it. This does not persist across reboots.
-      dupealias.gui.chest.refresh.integerhere: false # Controls the time it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
+      dupealias.gui.chest.refresh.integerhere: false # Controls the time in ticks it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
+      dupealias.gui.chest.keepondeath: false # Controls if a player should keep their chest GUI when they die. This only overrides the globally configured value if it is granted as true.

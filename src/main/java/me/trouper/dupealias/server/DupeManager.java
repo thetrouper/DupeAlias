@@ -3,7 +3,6 @@ package me.trouper.dupealias.server;
 import me.trouper.alias.utils.ItemBuilder;
 import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.data.GlobalRule;
-import me.trouper.dupealias.data.ItemCapture;
 import me.trouper.dupealias.server.functions.UniqueCheck;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -19,35 +18,8 @@ import java.util.*;
 
 public class DupeManager implements DupeContext {
 
-    /**
-     * @return false if the item was modified.
-     */
-    public boolean verifyTag(ItemStack item) {
-        if (getNbtStorage().captures.isEmpty()) return true;
-        ItemCapture capture = getNbtStorage().getCapture(item);
-        if (capture == null) return true;
-        boolean modified = false;
-
-        for (Map.Entry<ItemTag, Boolean> tagEntry : capture.getTags().entrySet()) {
-            ItemTag tag = tagEntry.getKey();
-            boolean value = tagEntry.getValue();
-            boolean set = hasIndividualTag(item,tag);
-            if (set && checkIndividualTag(item,tag) == value) {
-                continue;
-            } else if (!set) {
-                setTag(item,tagEntry.getKey(),value);
-            } else {
-                removeTag(item,tag);
-                setTag(item,tag,value);
-            }
-
-            modified = true;
-        }
-
-        return !modified;
-    }
-
     public boolean isUnique(ItemStack item) {
+        if (item == null || item.isEmpty()) return false;
         return !new UniqueCheck().passes(item);
     }
 
@@ -186,7 +158,7 @@ public class DupeManager implements DupeContext {
     public boolean removeTag(ItemStack item, ItemTag tag) {
         ItemBuilder builder = ItemBuilder.of(item);
 
-        if (hasIndividualTag(item, tag) && !checkIndividualTag(item, tag)) return false;
+        if (!hasIndividualTag(item, tag)) return false;
 
         builder.modifyMeta(itemMeta->{
             if (itemMeta.hasLore()) {

@@ -7,6 +7,10 @@ import me.trouper.dupealias.server.gui.admin.config.ConfigGui;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MainAdminGui implements CommonItems {
 
@@ -20,18 +24,6 @@ public class MainAdminGui implements CommonItems {
         QuickGui gui = QuickGui.create()
                 .titleMini("<gradient:#6b6bff:#9999ff><bold>DupeAlias Admin Panel</gradient>")
                 .rows(5)
-
-                .item(11, ItemBuilder.create(player.getInventory().getItemInMainHand().isEmpty() ? Material.BARRIER : Material.DIAMOND_SWORD)
-                                .displayName("<gradient:#4ecdc4:#45b7d1><bold>Held Item Actions</bold></gradient>")
-                                .loreMiniMessage(
-                                        "<gray>Manage tags for the item",
-                                        "<gray>you're currently holding",
-                                        "",
-                                        "<yellow>▶ <white>Click to open menu"
-                                )
-                                .hideAllFlags()
-                                .build(),
-                        (q, event) -> manager.openHeldItemGui(player))
 
                 .item(13, ItemBuilder.create(Material.BOOKSHELF)
                                 .displayName("<gradient:#ff6b6b:#ffa726><bold>Global Rules</bold></gradient>")
@@ -57,6 +49,17 @@ public class MainAdminGui implements CommonItems {
                                 .build(),
                         (q, event) -> manager.openHelpGui(player))
 
+                .item(11, ItemBuilder.create(Material.CHEST)
+                                .displayName("<gradient:#4ecdc4:#45b7d1><bold>Bulk Item Actions</bold></gradient>")
+                                .loreMiniMessage(
+                                        "<gray>Manage tags for multiple",
+                                        "<gray>items at a time",
+                                        "",
+                                        "<yellow>▶ <white>Click to open menu"
+                                )
+                                .build(),
+                        (q,event) -> manager.openBulkTagGui(player))
+
                 .item(29, ItemBuilder.create(Material.COMPARATOR)
                         .displayName("<gradient:#ff6bff:#ffa7ff><bold>Configuration</bold></gradient>")
                         .loreMiniMessage(
@@ -67,7 +70,8 @@ public class MainAdminGui implements CommonItems {
                         )
                         .build(), (q,event) -> manager.openConfigGui(player))
 
-                .item(31, manager.createPreviewItem(player.getInventory().getItemInMainHand()))
+                .item(31, createPreviewItem(player.getInventory().getItemInMainHand()),
+                        (q,event) -> manager.openHeldItemGui(player))
 
                 .item(33, ItemBuilder.create(Material.DIAMOND)
                         .displayName("<#AAAAFF><bold>Dupe<#00DDFF>Alias</bold> <white>Credits")
@@ -86,5 +90,33 @@ public class MainAdminGui implements CommonItems {
                 .build();
 
         gui.open(player);
+    }
+
+    private ItemStack createPreviewItem(ItemStack stack) {
+        if (stack.getType().isAir()) {
+            return ItemBuilder.create(Material.GRAY_STAINED_GLASS_PANE)
+                    .displayName("<gray><bold>No Item Held</bold>")
+                    .loreMiniMessage(Arrays.asList(
+                            "<gray>Hold an item to see",
+                            "<gray>its current tag status",
+                            "",
+                            "<yellow>💡 <white>Hold an item and reopen this GUI"
+                    ))
+                    .build();
+        }
+
+        List<String> lore = manager.getItemTagStatus(stack);
+        lore.addAll(List.of(
+                "",
+                "<gray>Manage tags for the item",
+                "<gray>you're currently holding",
+                "",
+                "<yellow>▶ <white>Click to open menu"
+        ));
+
+        return ItemBuilder.create(stack.getType())
+                .displayName("<gradient:#4ecdc4:#45b7d1><bold>Held Item Actions</bold></gradient>")
+                .loreMiniMessage(lore)
+                .build();
     }
 }

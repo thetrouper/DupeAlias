@@ -1,7 +1,6 @@
-package me.trouper.dupealias.server.gui.dupe;
+package me.trouper.dupealias.server.gui.dupe.sub;
 
 import me.trouper.alias.server.systems.gui.QuickGui;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -9,28 +8,28 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
-
+public class DupeInventoryGui extends AbstractDupeGui<DupeInventoryGui.InventorySession> {
+    
     @Override
-    protected ChestSession createSession(Player player) {
-        return new ChestSession(player);
+    protected InventorySession createSession(Player player) {
+        return new InventorySession(player);
     }
 
     @Override
-    public ChestSession getSession(Player player) {
-        ChestSession session = super.getSession(player);
-        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks));
+    public InventorySession getSession(Player player) {
+        InventorySession session = super.getSession(player);
+        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks));
         session.open();
         return session;
     }
 
-    public class ChestSession extends AbstractDupeSession {
+    public class InventorySession extends AbstractDupeSession {
         private Map<Integer, ItemDelayInfo> itemDelays = new HashMap<>();
         private int delayTicks;
 
-        public ChestSession(Player owner) {
-            super(owner, "<gradient:#cc22ff:#cc99ff><bold>DUPE CHEST</gradient>", 6);
-            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks);
+        public InventorySession(Player owner) {
+            super(owner, "<gradient:#cc22ff:#cc99ff><bold>YOUR INVENTORY</gradient>", 6);
+            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks);
         }
 
         @Override
@@ -51,14 +50,14 @@ public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
                     })
                     .allowDrag()
                     .clickSound(null,0,0)
-                    .onCreate((g, i) -> populateInventory(i))
+                    .onCreate((g, i) -> populateInventory(getOwner(), i))
                     .onClose((g, e) -> close())
                     .build();
         }
 
         @Override
         protected void tick() {
-            populateInventory(getGui().getInventory());
+            populateInventory(getOwner(), getGui().getInventory());
         }
 
         private void resetItemDelay(int slot) {
@@ -81,7 +80,7 @@ public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
                 itemDelays.put(slot, info);
             }
 
-            if (!sourceItem.isSimilar(info.originalItem)) {
+                if (!sourceItem.isSimilar(info.originalItem)) {
                 info = new ItemDelayInfo(sourceItem.clone());
                 itemDelays.put(slot, info);
             }
@@ -98,16 +97,28 @@ public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
             return createPopulatedItem(sourceItem, 1.0);
         }
 
-        private void populateInventory(Inventory inv) {
-            for (int row = 0; row < 6; row++) {
-                int rowStart = row * 9;
-                inv.setItem(rowStart + 4, EMPTY(Material.WHITE_STAINED_GLASS_PANE));
-                for (int col = 0; col < 4; col++) {
-                    int leftIndex = rowStart + col;
-                    int rightIndex = rowStart + 8 - col;
-                    ItemStack leftItem = inv.getItem(leftIndex);
-                    inv.setItem(rightIndex, getDelayedItem(rightIndex, leftItem));
-                }
+        private void populateInventory(Player player, Inventory inv) {
+            for (int i = 0; i < 18; i++) {
+                inv.setItem(i, EMPTY());
+            }
+
+            inv.setItem(0, getDelayedItem(0, player.getInventory().getHelmet()));
+            inv.setItem(1, getDelayedItem(1, player.getInventory().getChestplate()));
+            inv.setItem(2, getDelayedItem(2, player.getInventory().getLeggings()));
+            inv.setItem(3, getDelayedItem(3, player.getInventory().getBoots()));
+            inv.setItem(6, getDelayedItem(6, player.getInventory().getItemInOffHand()));
+
+            for (int i = 0; i < 9; i++) {
+                inv.setItem(i + 18, getDelayedItem(i + 18, player.getInventory().getItem(i)));
+            }
+            for (int i = 27; i < 36; i++) {
+                inv.setItem(i, getDelayedItem(i, player.getInventory().getItem(i)));
+            }
+            for (int i = 36; i < 45; i++) {
+                inv.setItem(i, getDelayedItem(i, player.getInventory().getItem(i - 18)));
+            }
+            for (int i = 45; i < 54; i++) {
+                inv.setItem(i, getDelayedItem(i, player.getInventory().getItem(i - 36)));
             }
         }
 

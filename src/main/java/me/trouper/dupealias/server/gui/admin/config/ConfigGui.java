@@ -6,6 +6,8 @@ import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.server.ItemTag;
 import me.trouper.dupealias.server.gui.CommonItems;
 import me.trouper.dupealias.server.gui.admin.AdminPanelManager;
+import me.trouper.dupealias.server.gui.admin.config.sub.CommandRegexGui;
+import me.trouper.dupealias.server.gui.admin.config.sub.CommonConfigGui;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -28,21 +30,19 @@ public class ConfigGui implements DupeContext, CommonItems {
                 .rows(5)
                 .clickSound(Sound.UI_BUTTON_CLICK, 0.5f, 1.0f)
 
-                // Back button
                 .item(0, BACK(), (g, e) -> manager.openMainGui(player))
 
-                // Dupe Cooldown
                 .callback("dupe_cooldown", new QuickGui.GuiCallback() {
                     @Override
                     public void onInput(QuickGui gui, Player player, String input, QuickGui.InputSource source) {
                         try {
-                            long millis = Long.parseLong(input);
+                            int millis = Integer.parseInt(input);
                             if (millis < 0) {
                                 errorAny(player, "Cooldown cannot be negative!");
                                 return;
                             }
                             infoAny(player, "You have set the dupe cooldown to {0}ms.", input);
-                            getConfig().dupeCooldownMillis = millis;
+                            getConfig().baseDupeCooldownMillis = millis;
                             getConfig().save();
                             open(player);
                         } catch (NumberFormatException ex) {
@@ -52,17 +52,17 @@ public class ConfigGui implements DupeContext, CommonItems {
                     }
                 })
                 .item(11, ItemBuilder.integerItem(Material.DIAMOND, "<aqua><bold>Dupe Command Cooldown</bold>", List.of(
-                        "<gray>How long players have to wait",
-                        "<gray>before running the /dupe command again.",
+                        "<gray>The base delay for command duping.",
+                        "<gray>use the permission dupealias.dupe.cooldown.<n>",
+                        "<gray>to configure cooldowns per-player",
                         "",
-                        "<yellow>Current: <white>" + getConfig().dupeCooldownMillis + "ms",
+                        "<yellow>Current: <white>" + getConfig().baseDupeCooldownMillis + "ms",
                         "",
                         "<yellow>▶ <white>Click to modify"
-                ), (int) getConfig().dupeCooldownMillis), (g, e) ->
+                ), (int) getConfig().baseDupeCooldownMillis), (g, e) ->
                         getDupe().getGuiListener().requestChatInput(g, player, "dupe_cooldown",
-                                "<aqua>Insert a long value of Milliseconds.\n<gray>     1000ms = 1 Second\n\n<yellow>Current value: <white>" + getConfig().dupeCooldownMillis + "ms"))
+                                "<aqua>Insert a long value of Milliseconds.\n<gray>     1000ms = 1 Second\n\n<yellow>Current value: <white>" + getConfig().baseDupeCooldownMillis + "ms"))
 
-                // Default Dupe GUI
                 .item(12, ItemBuilder.create(Material.CHEST)
                         .displayName("<green><bold>Default Dupe GUI</bold>")
                         .loreMiniMessage(Arrays.asList(
@@ -77,7 +77,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         ))
                         .build(), (g, e) -> cycleDefaultGui(player))
 
-                // Final Command Regex
                 .item(13, ItemBuilder.create(Material.BARRIER)
                         .displayName("<red><bold>Final Command Regex</bold>")
                         .loreMiniMessage(Arrays.asList(
@@ -90,7 +89,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         ))
                         .build(), (g, e) -> openFinalCommandRegexGui(player))
 
-                // Global Rules Editor
                 .item(14, ItemBuilder.create(Material.COMMAND_BLOCK)
                         .displayName("<light_purple><bold>Global Rules Editor</bold>")
                         .loreMiniMessage(Arrays.asList(
@@ -103,7 +101,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         ))
                         .build(), (g, e) -> openGlobalRulesGui(player))
 
-                // Tag Lore Settings
                 .item(15, ItemBuilder.create(Material.NAME_TAG)
                         .displayName("<yellow><bold>Tag Lore Settings</bold>")
                         .loreMiniMessage(Arrays.asList(
@@ -114,7 +111,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         ))
                         .build(), (g, e) -> openTagLoreGui(player, g))
 
-                // Common Settings
                 .item(22,ItemBuilder.create(Material.LIGHT)
                         .displayName("<gold><bold>Common Config</bold>")
                         .loreMiniMessage(
@@ -126,7 +122,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         .build(),
                         (g,e) -> openCommonGui(player, g))
 
-                // Replicator Settings
                 .item(30, ItemBuilder.create(Material.REPEATER)
                         .displayName("<blue><bold>Replicator Settings</bold>")
                         .loreMiniMessage(Arrays.asList(
@@ -139,7 +134,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         ))
                         .build(), (g, e) -> openReplicatorGui(player, g))
 
-                // Chest Settings
                 .item(31, ItemBuilder.create(Material.CHEST)
                         .displayName("<gold><bold>Chest GUI Settings</bold>")
                         .loreMiniMessage(Arrays.asList(
@@ -151,7 +145,6 @@ public class ConfigGui implements DupeContext, CommonItems {
                         ))
                         .build(), (g, e) -> openChestGui(player, g))
 
-                // Inventory Settings
                 .item(32, ItemBuilder.create(Material.ENDER_CHEST)
                         .displayName("<dark_purple><bold>Inventory GUI Settings</bold>")
                         .loreMiniMessage(Arrays.asList(

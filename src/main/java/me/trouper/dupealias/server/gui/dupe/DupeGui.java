@@ -4,6 +4,10 @@ import me.trouper.alias.server.systems.gui.QuickGui;
 import me.trouper.alias.utils.ItemBuilder;
 import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.server.gui.CommonItems;
+import me.trouper.dupealias.server.gui.dupe.sub.AbstractDupeGui;
+import me.trouper.dupealias.server.gui.dupe.sub.DupeChestGui;
+import me.trouper.dupealias.server.gui.dupe.sub.DupeInventoryGui;
+import me.trouper.dupealias.server.gui.dupe.sub.DupeReplicatorGui;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -18,6 +22,11 @@ public class DupeGui implements DupeContext, CommonItems {
     public final DupeChestGui chestGui = new DupeChestGui();
 
     public void openMainGui(Player player) {
+        if (!player.hasPermission("dupealias.gui")) {
+            warningAny(player,"You do not have permission to use the main dupe gui.");
+            return;
+        }
+
         QuickGui gui = QuickGui.create()
                 .rows(5)
                 .titleMini("<aqua><bold>Available GUIs")
@@ -85,7 +94,7 @@ public class DupeGui implements DupeContext, CommonItems {
             }
         } else {
             player.closeInventory();
-            warningAny(player,"You do not have permission to use that GUI!");
+            warningAny(player,"You do not have permission to use that GUI.");
         }
     }
 

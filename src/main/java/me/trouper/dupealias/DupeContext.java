@@ -4,7 +4,6 @@ import me.trouper.alias.server.ContextAware;
 import me.trouper.alias.server.events.listeners.GuiInputListener;
 import me.trouper.dupealias.data.files.CommonConfig;
 import me.trouper.dupealias.data.files.DupeConfig;
-import me.trouper.dupealias.data.files.NBTStorage;
 import me.trouper.dupealias.server.DupeManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,10 +23,6 @@ public interface DupeContext extends ContextAware {
 
     default DupeConfig getConfig() {
         return getDataManager().get(DupeConfig.class);
-    }
-    
-    default NBTStorage getNbtStorage() {
-        return getDataManager().get(NBTStorage.class);
     }
     
     default GuiInputListener getGuiListener() {

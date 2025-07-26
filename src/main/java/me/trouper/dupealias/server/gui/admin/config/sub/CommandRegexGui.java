@@ -1,4 +1,4 @@
-package me.trouper.dupealias.server.gui.admin.config;
+package me.trouper.dupealias.server.gui.admin.config.sub;
 
 import me.trouper.alias.server.systems.gui.QuickGui;
 import me.trouper.alias.server.systems.gui.QuickPaginatedGUI;

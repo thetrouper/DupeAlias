@@ -25,6 +25,10 @@ public class AdminPanelManager implements DupeContext, CommonItems {
     public void openHeldItemGui(Player player) {
         new HeldItemGui(this).open(player);
     }
+
+    public void openBulkTagGui(Player player) {
+        new BulkTagGui(this).open(player);
+    }
     
     public void openHelpGui(Player player) {
         new HelpGui(this).open(player);
@@ -289,28 +293,9 @@ public class AdminPanelManager implements DupeContext, CommonItems {
                 .build();
     }
 
-    public ItemStack createPreviewItem(ItemStack stack) {
-        if (stack.getType().isAir()) {
-            return ItemBuilder.create(Material.GRAY_STAINED_GLASS_PANE)
-                    .displayName("<gray><bold>No Item Held</bold>")
-                    .loreMiniMessage(Arrays.asList(
-                            "<gray>Hold an item to see",
-                            "<gray>its current tag status",
-                            "",
-                            "<yellow>💡 <white>Hold an item and reopen this GUI"
-                    ))
-                    .build();
-        }
-
-        return ItemBuilder.create(stack.getType())
-                .displayName("<white><bold>Currently Held: " + stack.getType().name() + "</bold>")
-                .loreMiniMessage(getItemTagStatus(stack))
-                .build();
-    }
-
     public List<String> getItemTagStatus(ItemStack item) {
         List<String> lore = new ArrayList<>();
-        lore.add("<white>Item: <yellow>" + item.getType().name());
+        lore.add("<white>Held Item: <yellow>" + item.getType().name());
         lore.add("");
 
         List<String> individualTags = new ArrayList<>();

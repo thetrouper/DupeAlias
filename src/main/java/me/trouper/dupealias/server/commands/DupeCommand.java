@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @CommandRegistry(
         value = "dupe",
-        permission = @Permission(value = "dupealias.dupe", message = "You do not have permission to duplicate items."),
         usage = "/dupe [integer|gui]",
         printStackTrace = true,
         blocksAllowed = false,
@@ -25,21 +24,15 @@ import java.util.UUID;
 )
 public class DupeCommand implements QuickCommand, DupeContext {
 
-    private final DupeGui dupeGui = new DupeGui();
+    public final DupeGui dupeGui = new DupeGui();
     private final Cooldown<UUID> dupeCooldown = new Cooldown<>();
 
     @Override
     public void handleCommand(CommandSender sender, Command command, String label, Args args) {
         Player player = (Player) sender;
-        if (!player.hasPermission("dupealias.dupe.cooldownbypass") && dupeCooldown.isOnCooldown(player.getUniqueId())) {
-            warningAny(player,"You can run /dupe again in {0}.", dupeCooldown.formatLong(player.getUniqueId()));
-            return;
-        }
 
         if (args.isEmpty()) {
-            if (dupeHeld(player,1)) {
-                dupeCooldown.setCooldown(player.getUniqueId(), getConfig().dupeCooldownMillis);
-            } else {
+            if (!verifyDupe(player,1)) {
                 dupeGui.openDefaultGui(player);
             }
             return;
@@ -66,9 +59,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
 
         try {
             int amount = args.get(0).toInt();
-            if (dupeHeld(player,amount)) {
-                dupeCooldown.setCooldown(player.getUniqueId(), getConfig().dupeCooldownMillis);
-            } else {
+            if (!verifyDupe(player,amount)) {
                 dupeGui.openDefaultGui(player);
             }
         } catch (NumberFormatException e) {
@@ -83,16 +74,50 @@ public class DupeCommand implements QuickCommand, DupeContext {
         );
     }
 
-    private boolean dupeHeld(Player player, int amount) {
-        ItemStack inHand = player.getInventory().getItemInMainHand();
-        if (getDupe().isUnique(inHand)) {
-            warningAny(player,"Your {0} is or contains a unique item that cannot be duped!", inHand.getType());
+    private boolean verifyDupe(Player player, int amount) {
+        if (!player.hasPermission("dupealias.dupe")) {
+            warningAny(player,"You are not allowed to dupe via commands.");
             return false;
         }
-        if (inHand.isEmpty()) return false;
+        if (dupeCooldown.isOnCooldown(player.getUniqueId())) {
+            warningAny(player,"You can command dupe again in {0}.", dupeCooldown.formatLong(player.getUniqueId()));
+            return false;
+        }
 
-        int baseCount = inHand.getAmount();
-        int maxPerStack = inHand.getMaxStackSize();
+        int playerMax = getDupe().getPermissionValue(player,"dupealias.dupe.limit.",Integer.MAX_VALUE);
+        if (amount > playerMax) {
+            warningAny(player,"Your maximum permitted dupe amplifier is {0}!", playerMax);
+            return false;
+        }
+
+        ItemStack toDupe = player.getInventory().getItemInMainHand();
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+
+        if (toDupe.isEmpty() && offHand.isEmpty()) {
+            warningAny(player,"You must hold an item to duplicate it with commands.");
+            return false;
+        }
+
+        if (toDupe.isEmpty() || getDupe().isUnique(toDupe)) {
+            if (getDupe().isUnique(offHand)) {
+                warningAny(player,"Your {0} is or contains a unique item that cannot be duped!", toDupe.getType());
+                return false;
+            } else {
+                toDupe = offHand;
+            }
+        }
+
+        dupeStack(player,toDupe,amount);
+
+        int playerCooldown = getDupe().getPermissionValue(player,"dupealias.dupe.cooldown.",getConfig().baseDupeCooldownMillis);
+        dupeCooldown.setCooldown(player.getUniqueId(), playerCooldown);
+
+        return true;
+    }
+
+    private void dupeStack(Player player, ItemStack heldStack, int amount) {
+        int baseCount = heldStack.getAmount();
+        int maxPerStack = heldStack.getMaxStackSize();
 
         for (int i = 0; i <= amount - 1; i++) {
             int remaining = baseCount * (1 << i);
@@ -101,18 +126,17 @@ public class DupeCommand implements QuickCommand, DupeContext {
                 int stackAmt = Math.min(remaining, maxPerStack);
                 remaining -= stackAmt;
 
-                ItemStack batch = inHand.clone();
+                ItemStack batch = heldStack.clone();
                 batch.setAmount(stackAmt);
 
                 if (!player.getInventory().addItem(batch).isEmpty()) {
                     infoAny(player,"Your inventory is now full.");
-                    return true;
+                    return;
                 }
             }
         }
 
         int totalGiven = baseCount * ((1 << amount) - 1);
         successAny(player,"You have duplicated {0} items!", totalGiven);
-        return true;
     }
 }

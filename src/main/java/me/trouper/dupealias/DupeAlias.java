@@ -5,7 +5,6 @@ import me.trouper.alias.AliasContextProvider;
 import me.trouper.alias.data.Common;
 import me.trouper.dupealias.data.files.CommonConfig;
 import me.trouper.dupealias.data.files.DupeConfig;
-import me.trouper.dupealias.data.files.NBTStorage;
 import me.trouper.dupealias.server.DupeManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,7 +28,6 @@ public final class DupeAlias extends JavaPlugin {
         alias.initialize();
         alias.getDataManager().load(CommonConfig.class).save();
         alias.getDataManager().load(DupeConfig.class).save();
-        alias.getDataManager().load(NBTStorage.class).save();
         updateCommon();
         
         dupe = new DupeManager();
@@ -39,7 +37,6 @@ public final class DupeAlias extends JavaPlugin {
     public void onDisable() {
         alias.getDataManager().save(CommonConfig.class);
         alias.getDataManager().save(DupeConfig.class);
-        alias.getDataManager().save(NBTStorage.class);
         alias.shutdown();
     }
 

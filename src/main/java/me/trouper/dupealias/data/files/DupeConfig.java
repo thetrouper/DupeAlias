@@ -4,7 +4,6 @@ import me.trouper.alias.data.JsonSerializable;
 import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.data.GlobalRule;
 import me.trouper.dupealias.server.ItemTag;
-import org.bukkit.Material;
 
 import java.io.File;
 import java.util.*;
@@ -15,7 +14,7 @@ public class DupeConfig implements JsonSerializable<DupeConfig>, DupeContext {
         return new File(getInstance().getDataFolder(),"config.json");
     }
 
-    public long dupeCooldownMillis = 1000;
+    public int baseDupeCooldownMillis = 1000;
 
     public String defaultDupeGui = "REPLICATOR";
 
