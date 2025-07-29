@@ -1,1 +1,1 @@
-Bulk item tag adder
+Messages and Language Configuration File

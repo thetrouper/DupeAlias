@@ -44,7 +44,7 @@ public class CommonConfigGui implements DupeContext, CommonItems {
                         errorAny(p, "Invalid hex color format. Use RRGGBB (e.g., AAAAFF).");
                     }
                 })
-                .item(10, ItemBuilder.create(Material.BLUE_WOOL)
+                .item(11, ItemBuilder.create(Material.BLUE_WOOL)
                         .displayName("<blue><bold>Main Color</bold>")
                         .loreMiniMessage(List.of(
                                 "<gray>The color for the message border.",
@@ -69,7 +69,7 @@ public class CommonConfigGui implements DupeContext, CommonItems {
                         errorAny(p, "Invalid hex color format. Use RRGGBB (e.g., 00DDFF).");
                     }
                 })
-                .item(11, ItemBuilder.create(Material.CYAN_WOOL)
+                .item(12, ItemBuilder.create(Material.CYAN_WOOL)
                         .displayName("<aqua><bold>Secondary Color</bold>")
                         .loreMiniMessage(List.of(
                                 "<gray>The color used for the plugin's name.",
@@ -88,7 +88,7 @@ public class CommonConfigGui implements DupeContext, CommonItems {
                     successAny(p, "Plugin name set to: {0}", input);
                     open(p);
                 })
-                .item(12, ItemBuilder.create(Material.NAME_TAG)
+                .item(13, ItemBuilder.create(Material.NAME_TAG)
                         .displayName("<green><bold>Plugin Name</bold>")
                         .loreMiniMessage(List.of(
                                 "<gray>The name of the plugin displayed in messages.",
@@ -107,7 +107,7 @@ public class CommonConfigGui implements DupeContext, CommonItems {
                     successAny(p, "Flat prefix set to: {0}", input);
                     open(p);
                 })
-                .item(13, ItemBuilder.create(Material.PAPER)
+                .item(14, ItemBuilder.create(Material.PAPER)
                         .displayName("<gray><bold>Flat Prefix</bold>")
                         .loreMiniMessage(List.of(
                                 "<gray>The prefix used when 'flat' mode is enabled.",
@@ -120,7 +120,7 @@ public class CommonConfigGui implements DupeContext, CommonItems {
                         getDupe().getGuiListener().requestChatInput(g, player, "flat_prefix",
                                 "<gray>Enter the new flat prefix."))
 
-                .item(14, ItemBuilder.create(config.flat ? Material.LIME_DYE : Material.GRAY_DYE)
+                .item(15, ItemBuilder.create(config.flat ? Material.LIME_DYE : Material.GRAY_DYE)
                         .displayName("<white><bold>Flat Mode</bold>")
                         .loreMiniMessage(List.of(
                                 "<gray>If true, uses the simple flat message system",

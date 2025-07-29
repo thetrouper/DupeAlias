@@ -30,8 +30,8 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
     @Override
     public ReplicatorSession getSession(Player player) {
         ReplicatorSession session = super.getSession(player);
-        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.replicator.refresh.", getConfig().replicator.baseRefreshDelayTicks));
-        session.setCooldownTicks(getDupe().getPermissionValue(player, "dupealias.gui.replicator.cooldown.", getConfig().replicator.baseInputCooldownTicks));
+        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.replicator.refresh.", getConfig().replicator.baseRefreshDelayTicks,false));
+        session.setCooldownTicks(getDupe().getPermissionValue(player, "dupealias.gui.replicator.cooldown.", getConfig().replicator.baseInputCooldownTicks,false));
         session.open();
         return session;
     }
@@ -49,8 +49,8 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
             super(owner, "<gradient:#cc22ff:#cc99ff><bold>REPLICATOR</gradient>", 3);
             getVerbose().send("Creating a new replicator with input of {0}", input.getType().name());
             setInput(input);
-            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.replicator.refresh.", getConfig().replicator.baseRefreshDelayTicks);
-            this.cooldownTicks = getDupe().getPermissionValue(owner, "dupealias.gui.replicator.cooldown.", getConfig().replicator.baseInputCooldownTicks);
+            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.replicator.refresh.", getConfig().replicator.baseRefreshDelayTicks,false);
+            this.cooldownTicks = getDupe().getPermissionValue(owner, "dupealias.gui.replicator.cooldown.", getConfig().replicator.baseInputCooldownTicks,false);
         }
 
         @Override

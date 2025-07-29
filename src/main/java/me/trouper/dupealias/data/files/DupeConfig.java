@@ -6,7 +6,10 @@ import me.trouper.dupealias.data.GlobalRule;
 import me.trouper.dupealias.server.ItemTag;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DupeConfig implements JsonSerializable<DupeConfig>, DupeContext {
     @Override
@@ -36,6 +39,8 @@ public class DupeConfig implements JsonSerializable<DupeConfig>, DupeContext {
             ItemTag.UNIQUE, "<dark_blue><bold>|</bold><blue> Dupeable",
             ItemTag.INFINITE, "<dark_green><bold>|</bold><green> Finite"
     ));
+
+    public boolean blockDupePlus = false;
     
     public List<GlobalRule> globalRules = new ArrayList<>();
     

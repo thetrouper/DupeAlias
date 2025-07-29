@@ -14,7 +14,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class DupeManager implements DupeContext {
 
@@ -77,7 +79,9 @@ public class DupeManager implements DupeContext {
      * Checks if any global rule applies this tag to the given item
      */
     public boolean checkGlobalRuleTag(ItemStack input, ItemTag tag) {
+        getVerbose().send("Checking tag {0} on item {1}",tag,input.getType());
         for (GlobalRule rule : getConfig().globalRules) {
+            getVerbose().send("Scanning rule with tags {0}",rule.appliedTags.toString());
             if (rule.appliedTags.contains(tag) && rule.doesMatch(input)) {
                 return true;
             }
@@ -122,12 +126,11 @@ public class DupeManager implements DupeContext {
      * Adds a global rule for a specific material and tag
      */
     public boolean addGlobalRuleForMaterial(Material material, ItemTag tag) {
-        // Check if rule already exists
         for (GlobalRule rule : getConfig().globalRules) {
             if (rule.appliedTags.contains(tag) &&
                     rule.materialMode == GlobalRule.MaterialMatchMode.WHITELIST &&
                     rule.effectedMaterials.contains(material)) {
-                return false; // Rule already exists
+                return false;
             }
         }
 
@@ -236,8 +239,8 @@ public class DupeManager implements DupeContext {
         throw new IllegalArgumentException("Invalid NameSpacedKey '%s'".formatted(key.value()));
     }
 
-    public int getPermissionValue(Player player, String rootPermission, int fallback) {
-        int lowestCooldown = Integer.MAX_VALUE;
+    public int getPermissionValue(Player player, String rootPermission, int fallback, boolean takeHighest) {
+        int result = takeHighest ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
             String perm = permInfo.getPermission();
@@ -246,13 +249,24 @@ public class DupeManager implements DupeContext {
                 String valueStr = perm.substring(rootPermission.length());
                 try {
                     int value = Integer.parseInt(valueStr);
-                    if (value < lowestCooldown) {
-                        lowestCooldown = value;
+                    if (takeHighest) {
+                        if (value > result) {
+                            result = value;
+                        }
+                    } else {
+                        if (value < result) {
+                            result = value;
+                        }
                     }
                 } catch (NumberFormatException ignored) {}
             }
         }
 
-        return (lowestCooldown == Integer.MAX_VALUE) ? fallback : lowestCooldown;
+        if (takeHighest) {
+            return (result == Integer.MIN_VALUE) ? fallback : result;
+        } else {
+            return (result == Integer.MAX_VALUE) ? fallback : result;
+        }
     }
+
 }

@@ -5,13 +5,9 @@ import me.trouper.alias.utils.ItemBuilder;
 import me.trouper.dupealias.DupeAlias;
 import me.trouper.dupealias.DupeContext;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.data.type.Light;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 public interface CommonItems extends DupeContext {

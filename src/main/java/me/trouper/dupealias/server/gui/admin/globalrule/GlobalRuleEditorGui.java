@@ -15,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GlobalRuleEditorGui implements DupeContext, CommonItems {
 
@@ -33,90 +32,83 @@ public class GlobalRuleEditorGui implements DupeContext, CommonItems {
                 .rows(6)
                 .fillBorder(EMPTY(Material.ORANGE_STAINED_GLASS_PANE))
 
-                // Back button
+                // Back button top-left
                 .item(0, BACK(), (g, e) -> manager.openGlobalRuleList(player))
 
-                // Applied Tags Section
-                .item(10, createTagItem(ItemTag.UNIQUE),
-                        (g, e) -> toggleTag(player, ItemTag.UNIQUE))
-                .item(11, createTagItem(ItemTag.FINAL),
-                        (g, e) -> toggleTag(player, ItemTag.FINAL))
-                .item(12, createTagItem(ItemTag.INFINITE),
-                        (g, e) -> toggleTag(player, ItemTag.INFINITE))
-                .item(13, createTagItem(ItemTag.PROTECTED),
-                        (g, e) -> toggleTag(player, ItemTag.PROTECTED))
+                // Item Tags
+                .item(10, createTagItem(ItemTag.UNIQUE),    (g, e) -> toggleTag(player, ItemTag.UNIQUE))
+                .item(11, createTagItem(ItemTag.FINAL),     (g, e) -> toggleTag(player, ItemTag.FINAL))
+                .item(12, createTagItem(ItemTag.INFINITE),  (g, e) -> toggleTag(player, ItemTag.INFINITE))
+                .item(13, createTagItem(ItemTag.PROTECTED), (g, e) -> toggleTag(player, ItemTag.PROTECTED))
 
-                // Match Mode
-                .item(16, createMatchModeItem(),
-                        (g, e) -> cycleMatchMode(player))
+                // Material Matching
+                .item(16, createMaterialListItem(), (g, e) -> {
+                    if (rule.materialMode != GlobalRule.MaterialMatchMode.IGNORE)
+                        manager.openMaterialSelector(player, rule);
+                })
+                .item(25, createItemsAdderListItem(), (g, e) -> {
+                    if (rule.materialMode != GlobalRule.MaterialMatchMode.IGNORE)
+                        manager.openItemsAdderParser(player, rule);
+                })
+                .item(34, createMaterialModeItem(), (g, e) -> cycleMaterialMode(player))
 
-                // Criteria Items
-                .item(19, createCriteriaItem("Name Regex", Material.NAME_TAG,
+                // Criteria Match Mode
+                .item(43, createMatchModeItem(), (g, e) -> cycleMatchMode(player))
+
+                // Criteria Section
+                .item(28, createCriteriaItem("Name Regex", Material.NAME_TAG,
                                 !rule.nameContainsRegex.isEmpty(), rule.nameContainsRegex),
                         (g, e) -> manager.openNameCriteriaEditor(player, rule))
 
-                .item(20, createCriteriaItem("Lore Regex", Material.WRITABLE_BOOK,
+                .item(29, createCriteriaItem("Lore Regex", Material.WRITABLE_BOOK,
                                 !rule.loreContainsRegex.isEmpty(), rule.loreContainsRegex),
                         (g, e) -> manager.openLoreCriteriaEditor(player, rule))
 
-                .item(21, createCriteriaItem("Enchantments", Material.ENCHANTED_BOOK,
+                .item(30, createCriteriaItem("NBT Regex", Material.BOOK,
+                                !rule.nbtTagContainsRegex.isEmpty(), rule.nbtTagContainsRegex),
+                        (g, e) -> manager.openNbtCriteriaEditor(player, rule))
+
+                .item(31, createCriteriaItem("Compound Regex", Material.BOOKSHELF,
+                                !rule.compoundTagContainsRegex.isEmpty(), rule.compoundTagContainsRegex),
+                        (g, e) -> manager.openCompoundCriteriaEditor(player, rule))
+
+                .item(32, createCriteriaItem("Model Data", Material.COMPASS,
+                                !rule.legacyModelData.isEmpty(), rule.legacyModelData.size() + " values"),
+
+                        (g, e) -> manager.openModelDataEditor(player, rule))
+                .item(37, createCriteriaItem("Enchantments", Material.ENCHANTED_BOOK,
                                 !rule.enchantments.isEmpty(), rule.enchantments.size() + " enchants"),
                         (g, e) -> manager.openEnchantmentEditor(player, rule))
 
-                .item(22, createCriteriaItem("Attributes", Material.GOLDEN_APPLE,
+                .item(38, createCriteriaItem("Attributes", Material.GOLDEN_APPLE,
                                 !rule.attributes.isEmpty(), rule.attributes.size() + " attributes"),
                         (g, e) -> manager.openAttributeEditor(player, rule))
 
-                .item(23, createCriteriaItem("Item Flags", Material.WHITE_BANNER,
+                .item(39, createCriteriaItem("Item Flags", Material.WHITE_BANNER,
                                 !rule.itemFlags.isEmpty(), rule.itemFlags.size() + " flags"),
                         (g, e) -> manager.openItemFlagEditor(player, rule))
 
-                .item(24, createCriteriaItem("Model Data", Material.COMPASS,
-                                !rule.legacyModelData.isEmpty(), rule.legacyModelData.size() + " values"),
-                        (g, e) -> manager.openModelDataEditor(player, rule))
-
-                .item(25, createCriteriaItem("Potion Effects", Material.POTION,
+                .item(40, createCriteriaItem("Potion Effects", Material.POTION,
                                 !rule.potionEffects.isEmpty(), rule.potionEffects.size() + " effects"),
                         (g, e) -> manager.openPotionEffectEditor(player, rule))
 
-                // Material Settings
-                .item(30, createMaterialModeItem(),
-                        (g, e) -> cycleMaterialMode(player))
-
-                .item(31, createMaterialListItem(),
-                        (g, e) -> {
-                            if (rule.materialMode != GlobalRule.MaterialMatchMode.IGNORE) {
-                                manager.openMaterialSelector(player, rule);
-                            }
-                        })
-
-                // Armor Trim
-                .item(32, createCriteriaItem("Armor Trim", Material.NETHERITE_CHESTPLATE,
+                .item(41, createCriteriaItem("Armor Trim", Material.NETHERITE_CHESTPLATE,
                                 !rule.trimPatterns.isEmpty() || !rule.trimMaterials.isEmpty(),
                                 (rule.trimPatterns.size() + rule.trimMaterials.size()) + " selected"),
                         (g, e) -> manager.openArmorTrimEditor(player, rule))
 
-                // Save button
-                .item(40, ItemBuilder.create(Material.LIME_DYE)
-                        .displayName("<green><bold>Save & Return")
-                        .loreMiniMessage(Arrays.asList(
-                                "<gray>Save changes and return",
-                                "<gray>to the rule list",
-                                "",
-                                "<yellow>▶ <white>Click to save"
-                        ))
-                        .build(), (g, e) -> {
+                .onClose((g, e) -> {
                     getConfig().save();
                     successAny(player, "Saved global rule");
-                    manager.openGlobalRuleList(player);
                 })
-
                 .fillEmpty(EMPTY())
                 .clickSound(Sound.UI_BUTTON_CLICK, 0.7f, 1.2f)
                 .build();
 
         gui.open(player);
     }
+
+
 
     private ItemStack createTagItem(ItemTag tag) {
         boolean active = rule.appliedTags.contains(tag);
@@ -217,8 +209,8 @@ public class GlobalRuleEditorGui implements DupeContext, CommonItems {
             lore.add("");
             List<String> materialNames = rule.effectedMaterials.stream()
                     .limit(5)
-                    .map(mat -> mat.name())
-                    .collect(Collectors.toList());
+                    .map(Enum::name)
+                    .toList();
 
             for (String mat : materialNames) {
                 lore.add("<gray>• " + mat);
@@ -234,6 +226,51 @@ public class GlobalRuleEditorGui implements DupeContext, CommonItems {
 
         return ItemBuilder.create(Material.CHEST)
                 .displayName("<white><bold>Material List")
+                .loreMiniMessage(lore)
+                .build();
+    }
+
+    private ItemStack createItemsAdderListItem() {
+        if (rule.materialMode == GlobalRule.MaterialMatchMode.IGNORE) {
+            return ItemBuilder.create(Material.GRAY_DYE)
+                    .displayName("<gray><bold>ItemsAdder List")
+                    .loreMiniMessage(Arrays.asList(
+                            "<gray>Set material mode to",
+                            "<gray>WHITELIST or BLACKLIST",
+                            "<gray>to configure materials"
+                    ))
+                    .build();
+        }
+
+        List<String> lore = new ArrayList<>();
+        lore.add("<gray>Manage custom materials for this rule");
+        lore.add("");
+        lore.add("<white>Selected: <yellow>" + rule.effectedItemsAdderMaterials.size() + " Custom Materials");
+
+        if (!rule.effectedMaterials.isEmpty()) {
+            lore.add("");
+            List<String> items = new ArrayList<>();
+
+            rule.effectedItemsAdderMaterials.stream()
+                    .limit(5)
+                    .forEach((iai)->{
+                        items.add("<dark_green>" + iai.namespace + "<gray>:<green>" + iai.id);
+                    });
+
+            for (String mat : items) {
+                lore.add("<gray>• " + mat);
+            }
+
+            if (rule.effectedMaterials.size() > 5) {
+                lore.add("<gray>... and " + (rule.effectedMaterials.size() - 5) + " more");
+            }
+        }
+
+        lore.add("");
+        lore.add("<yellow>▶ <white>Click to manage");
+
+        return ItemBuilder.create(Material.CHEST)
+                .displayName("<white><bold>ItemsAdder List")
                 .loreMiniMessage(lore)
                 .build();
     }

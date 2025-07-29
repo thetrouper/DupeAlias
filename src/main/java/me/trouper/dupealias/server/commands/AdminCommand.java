@@ -7,6 +7,7 @@ import me.trouper.alias.server.commands.QuickCommand;
 import me.trouper.alias.server.commands.completions.CompletionBuilder;
 import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.data.GlobalRule;
+import me.trouper.dupealias.data.ItemsAdderItem;
 import me.trouper.dupealias.server.ItemTag;
 import me.trouper.dupealias.server.gui.admin.AdminPanelManager;
 import me.trouper.dupealias.server.gui.admin.MainAdminGui;
@@ -47,6 +48,10 @@ public class AdminCommand implements QuickCommand, DupeContext {
 
             case "rule" -> {
                 handleRule(sender,args);
+            }
+
+            case "test" -> {
+                handleDebugTests(sender,args);
             }
 
             default -> {
@@ -93,13 +98,20 @@ public class AdminCommand implements QuickCommand, DupeContext {
                                 )
                 ).then(
                         b.arg("gui")
+                ).then(
+
+                        b.arg("test")
+                                .then(
+                                        b.arg("nbt","component","itemsadder")
+                                )
+
                 );
     }
 
 
     private void handleDebug(CommandSender sender, Args args) {
         if (args.getSize() < 2) {
-            errorAny(sender, "Usage: debug <toggle|include|exclude>");
+            errorAny(sender, "Usage: debug <toggle|include|exclude|test>");
             return;
         }
 
@@ -140,6 +152,43 @@ public class AdminCommand implements QuickCommand, DupeContext {
                 getInstance().updateCommon();
 
                 successAny(sender, "Removed exclusion for {0} on the debugger.", exclusion);
+            }
+            case "test" -> handleDebugTests(sender, args);
+        }
+    }
+
+    private void handleDebugTests(CommandSender sender, Args args) {
+        if (args.getSize() < 2) {
+            errorAny(sender, "Usage: test <nbt|component>");
+            return;
+        }
+
+        final String sub = args.get(1).toString();
+
+        switch (sub) {
+            case "nbt" -> {
+                Player player = (Player) sender;
+                String tag = player.getInventory().getItemInMainHand().getItemMeta().getAsString();
+                infoAny(player,"The item you are holding has a visible NBT String of {0} to the plugin.", tag);
+                getInstance().getLogger().info(tag);
+            }
+            case "component" -> {
+                Player player = (Player) sender;
+                String component = player.getInventory().getItemInMainHand().getItemMeta().getAsComponentString();
+                infoAny(player,"The item you are holding has a visible Component String of {0} to the plugin.", component);
+                getInstance().getLogger().info(component);
+            }
+            case "itemsadder" -> {
+                Player player = (Player) sender;
+                ItemsAdderItem item;
+                try {
+                    item = new ItemsAdderItem(player.getInventory().getItemInMainHand());
+                } catch (IllegalArgumentException ex) {
+                    ex.printStackTrace();
+                    errorAny(player,"That item is not being detected as from ItemsAdder.");
+                    return;
+                }
+                successAny(player,"Your item has an ID of {0} in the namespace of {1}.",item.id,item.namespace);
             }
         }
     }

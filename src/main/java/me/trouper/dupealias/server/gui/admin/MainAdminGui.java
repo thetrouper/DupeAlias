@@ -3,7 +3,6 @@ package me.trouper.dupealias.server.gui.admin;
 import me.trouper.alias.server.systems.gui.QuickGui;
 import me.trouper.alias.utils.ItemBuilder;
 import me.trouper.dupealias.server.gui.CommonItems;
-import me.trouper.dupealias.server.gui.admin.config.ConfigGui;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

@@ -2,6 +2,7 @@ package me.trouper.dupealias.data;
 
 import me.trouper.alias.data.enums.*;
 import me.trouper.alias.utils.misc.MapUtils;
+import me.trouper.dupealias.DupeContext;
 import me.trouper.dupealias.server.ItemTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -21,7 +22,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class GlobalRule {
+public class GlobalRule implements DupeContext {
 
     public enum MatchMode {
         AND, OR, NAND, XOR
@@ -36,9 +37,12 @@ public class GlobalRule {
     public MatchMode matchMode = MatchMode.AND;
     public MaterialMatchMode materialMode = MaterialMatchMode.IGNORE;
     public Set<Material> effectedMaterials = EnumSet.noneOf(Material.class);
+    public List<ItemsAdderItem> effectedItemsAdderMaterials = new ArrayList<>();
 
     public String nameContainsRegex = "";
     public String loreContainsRegex = "";
+    public String compoundTagContainsRegex = "";
+    public String nbtTagContainsRegex = "";
     public Set<Integer> legacyModelData = new HashSet<>();
     public Set<ItemFlag> itemFlags = EnumSet.noneOf(ItemFlag.class);
     public Map<ValidEnchantment, Integer> enchantments = new HashMap<>();
@@ -51,20 +55,26 @@ public class GlobalRule {
 
     @SuppressWarnings("deprecation")
     public boolean doesMatch(ItemStack item) {
-        if (item == null || item.getType() == Material.AIR) return false;
+        if (item == null || item.isEmpty()) return false;
+
+        ItemsAdderItem iai = new ItemsAdderItem();
+        try {
+            iai = new ItemsAdderItem(item);
+        } catch (IllegalArgumentException ignored) {}
 
         switch (materialMode) {
             case WHITELIST -> {
-                if (!effectedMaterials.contains(item.getType())) return false;
+                if (!effectedMaterials.contains(item.getType()) && !effectedItemsAdderMaterials.contains(iai)) return false;
             }
             case BLACKLIST -> {
-                if (effectedMaterials.contains(item.getType())) return false;
+                if (effectedMaterials.contains(item.getType()) || effectedItemsAdderMaterials.contains(iai)) return false;
             }
             case IGNORE -> {}
         }
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return false;
+
 
         List<Boolean> results = new ArrayList<>();
 
@@ -80,6 +90,18 @@ public class GlobalRule {
             Pattern lorePattern = safeCompileRegex(loreContainsRegex);
             boolean found = !lore.isEmpty() && lore.stream().anyMatch(line -> lorePattern.matcher(line).find());
             results.add(found);
+        }
+
+        if (!compoundTagContainsRegex.isEmpty()) {
+            Pattern compoundPatten = safeCompileRegex(compoundTagContainsRegex);
+            String compound = meta.getAsComponentString();
+            results.add(compoundPatten.matcher(compound).find());
+        }
+
+        if (!nbtTagContainsRegex.isEmpty()) {
+            Pattern nbtPattern = safeCompileRegex(compoundTagContainsRegex);
+            String nbt = meta.getAsString();
+            results.add(nbtPattern.matcher(nbt).find());
         }
 
         if (!enchantments.isEmpty()) {
@@ -135,6 +157,8 @@ public class GlobalRule {
         int trueCount = (int) results.stream().filter(Boolean::booleanValue).count();
         int total = results.size();
 
+        if (getCriteriaCount() == 0) return true;
+
         return switch (matchMode) {
             case AND -> trueCount == total;
             case OR -> trueCount > 0;
@@ -156,11 +180,13 @@ public class GlobalRule {
         int criteriaCount = 0;
         if (!nameContainsRegex.isEmpty()) criteriaCount++;
         if (!loreContainsRegex.isEmpty()) criteriaCount++;
+        if (!nbtTagContainsRegex.isEmpty()) criteriaCount++;
+        if (!compoundTagContainsRegex.isEmpty()) criteriaCount++;
+        if (!legacyModelData.isEmpty()) criteriaCount++;
         if (!enchantments.isEmpty()) criteriaCount++;
         if (!potionEffects.isEmpty()) criteriaCount++;
         if (!attributes.isEmpty()) criteriaCount++;
         if (!itemFlags.isEmpty()) criteriaCount++;
-        if (!legacyModelData.isEmpty()) criteriaCount++;
         if (!trimPatterns.isEmpty()) criteriaCount++;
         if (!trimMaterials.isEmpty()) criteriaCount++;
         return criteriaCount;

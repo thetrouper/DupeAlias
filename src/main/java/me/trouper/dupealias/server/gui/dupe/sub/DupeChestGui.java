@@ -21,7 +21,7 @@ public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
     @Override
     public ChestSession getSession(Player player) {
         ChestSession session = super.getSession(player);
-        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks));
+        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks,false));
         session.open();
         return session;
     }
@@ -32,7 +32,7 @@ public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
 
         public ChestSession(Player owner) {
             super(owner, "<gradient:#cc22ff:#cc99ff><bold>DUPE CHEST</gradient>", 6);
-            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks);
+            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks,false);
         }
 
         @Override

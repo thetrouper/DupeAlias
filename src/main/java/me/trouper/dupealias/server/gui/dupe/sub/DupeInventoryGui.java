@@ -18,7 +18,7 @@ public class DupeInventoryGui extends AbstractDupeGui<DupeInventoryGui.Inventory
     @Override
     public InventorySession getSession(Player player) {
         InventorySession session = super.getSession(player);
-        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks));
+        session.setDelayTicks(getDupe().getPermissionValue(player, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks,false));
         session.open();
         return session;
     }
@@ -29,7 +29,7 @@ public class DupeInventoryGui extends AbstractDupeGui<DupeInventoryGui.Inventory
 
         public InventorySession(Player owner) {
             super(owner, "<gradient:#cc22ff:#cc99ff><bold>YOUR INVENTORY</gradient>", 6);
-            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks);
+            this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks,false);
         }
 
         @Override

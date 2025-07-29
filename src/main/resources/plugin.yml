@@ -35,8 +35,8 @@ permissions:
     description: Allows duplication of items through the command. Setting this to false results in the /dupe command always displaying a GUI.
     default: true
     children:
-      dupealias.dupe.cooldown.integerhere: false # Controls the cooldown time in ticks it will take to command dupe again.
-      dupealias.dupe.limit.integerhere: false # Controls the integer argument's limit for exponential (2^n) duping.
+      dupealias.dupe.cooldown.integerhere: false # Controls the cooldown time in milliseconds it will take to command dupe again. Always takes the lowest number on a permission holder.
+      dupealias.dupe.limit.integerhere: false # Controls the integer argument's limit for exponential (2^n) duping. Always takes the highest is number on a permission holder.
   dupealias.gui:
     description: Allows access to the main dupe GUI selector. Players do not need this permission to access subsequent GUIs through the dupe command arguments.
     default: true
@@ -50,6 +50,7 @@ permissions:
     children:
       dupealias.gui.replicator.keep: false # Controls if a player should keep their previous replicator session with items in it. This does not persist across reboots.
       dupealias.gui.replicator.refresh.integerhere: false # Controls the time in ticks it will take a duplicated item to refill or refresh in the GUI. Always takes the lowest number on a permission holder.
+      dupealias.gui.replicator.cooldown.integerhere: false # Controls the time in milliseconds between input updates.
   dupealias.gui.inventory:
     description: The gui which shows your inventory and armor on top.
     default: true

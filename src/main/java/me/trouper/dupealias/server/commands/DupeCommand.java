@@ -2,7 +2,6 @@ package me.trouper.dupealias.server.commands;
 
 import me.trouper.alias.server.commands.Args;
 import me.trouper.alias.server.commands.CommandRegistry;
-import me.trouper.alias.server.commands.Permission;
 import me.trouper.alias.server.commands.QuickCommand;
 import me.trouper.alias.server.commands.completions.CompletionBuilder;
 import me.trouper.alias.utils.misc.Cooldown;
@@ -84,7 +83,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
             return false;
         }
 
-        int playerMax = getDupe().getPermissionValue(player,"dupealias.dupe.limit.",Integer.MAX_VALUE);
+        int playerMax = getDupe().getPermissionValue(player,"dupealias.dupe.limit.",Integer.MAX_VALUE,true);
         if (amount > playerMax) {
             warningAny(player,"Your maximum permitted dupe amplifier is {0}!", playerMax);
             return false;
@@ -109,7 +108,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
 
         dupeStack(player,toDupe,amount);
 
-        int playerCooldown = getDupe().getPermissionValue(player,"dupealias.dupe.cooldown.",getConfig().baseDupeCooldownMillis);
+        int playerCooldown = getDupe().getPermissionValue(player,"dupealias.dupe.cooldown.",getConfig().baseDupeCooldownMillis,false);
         dupeCooldown.setCooldown(player.getUniqueId(), playerCooldown);
 
         return true;

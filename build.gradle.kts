@@ -16,11 +16,16 @@ java {
 
 repositories {
   mavenLocal()
+  maven {
+    name = "matteodev"
+    url = uri("https://maven.devs.beer/")
+  }
 }
 
 dependencies {
   paperweight.paperDevBundle("1.21.5-R0.1-SNAPSHOT")
   implementation("me.trouper:alias:1.0-1.21.5-SNAPSHOT")
+  compileOnly("dev.lone:api-itemsadder:4.0.10")
 }
 
 tasks {
