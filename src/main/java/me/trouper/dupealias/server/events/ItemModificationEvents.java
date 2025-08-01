@@ -42,7 +42,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
         if (getDupe().checkEffectiveTag(result, ItemTag.PROTECTED)) {
             event.getInventory().setResult(null);
-            warningAny(Audience.audience(event.getViewers()), "You cannot craft protected items!");
+            warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.craftProtectedItem);
             return;
         }
 
@@ -51,13 +51,13 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
             if (getDupe().checkEffectiveTag(ingredient, ItemTag.FINAL)) {
                 if (isModifyingCraft(ingredient, result)) {
                     event.getInventory().setResult(null);
-                    warningAny(Audience.audience(event.getViewers()), "You cannot modify final items!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.modifyFinalItem);
                     return;
                 }
             }
             if (getDupe().checkEffectiveTag(ingredient, ItemTag.PROTECTED)) {
                 event.getInventory().setResult(null);
-                warningAny(Audience.audience(event.getViewers()), "You cannot use protected items!");
+                warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.useProtectedItem);
                 return;
             }
         }
@@ -92,7 +92,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
         if (getDupe().checkEffectiveTag(item, ItemTag.FINAL)) {
             event.setCancelled(true);
-            warningAny(event.getEnchanter(), "You cannot modify final items!");
+            warningAny(event.getEnchanter(), dict().itemModificationEvents.modifyFinalItem);
         }
     }
 
@@ -249,41 +249,41 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
         switch (inv) {
             case LoomInventory loom -> {
                 if (getDupe().checkEffectiveTag(loom.getItem(1), ItemTag.PROTECTED) || getDupe().checkEffectiveTag(loom.getItem(2), ItemTag.PROTECTED)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot use a protected item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.useProtectedItem);
                     event.getInventory().close();
                 }
                 if (getDupe().checkEffectiveTag(loom.getItem(0), ItemTag.FINAL)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot modify a final item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.modifyFinalItem);
                     event.getInventory().close();
                 }
             }
             case CartographyInventory carto -> {
                 if (getDupe().checkEffectiveTag(carto.getResult(), ItemTag.PROTECTED)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot use a protected item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.useProtectedItem);
                     event.getInventory().close();
                 }
                 if (getDupe().checkEffectiveTag(carto.getItem(0), ItemTag.FINAL) || getDupe().checkEffectiveTag(carto.getItem(1), ItemTag.FINAL)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot modify a final item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.modifyFinalItem);
                     event.getInventory().close();
                 }
             }
             case GrindstoneInventory grind -> {
                 if (getDupe().checkEffectiveTag(grind.getResult(), ItemTag.PROTECTED)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot use a protected item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.useProtectedItem);
                     event.getInventory().close();
                 }
                 if (getDupe().checkEffectiveTag(grind.getItem(0), ItemTag.FINAL) || getDupe().checkEffectiveTag(grind.getItem(1), ItemTag.FINAL)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot modify a final item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.modifyFinalItem);
                     event.getInventory().close();
                 }
             }
             case StonecutterInventory stone -> {
                 if (getDupe().checkEffectiveTag(stone.getResult(), ItemTag.PROTECTED)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot use a protected item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.useProtectedItem);
                     event.getInventory().close();
                 }
                 if (getDupe().checkEffectiveTag(stone.getItem(0), ItemTag.FINAL)) {
-                    warningAny(Audience.audience(event.getViewers()), "You cannot modify a final item!");
+                    warningAny(Audience.audience(event.getViewers()), dict().itemModificationEvents.modifyFinalItem);
                     event.getInventory().close();
                 }
             }
@@ -314,12 +314,12 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
             if (main.getType().equals(Material.BUCKET) || main.getType().equals(Material.GLASS_BOTTLE) || main.getType().name().contains("BANNER") || main.getType().name().contains("ARMOR")) {
                 if (getDupe().checkEffectiveTag(main, ItemTag.FINAL) || getDupe().checkEffectiveTag(main, ItemTag.FINAL)) {
                     event.setCancelled(true);
-                    warningAny(player, "That item is final and cannot be modified!");
+                    warningAny(player, dict().itemModificationEvents.modifyFinalItem);
                 }
             } else if (off.getType().equals(Material.BUCKET) || off.getType().equals(Material.GLASS_BOTTLE) || off.getType().name().contains("BANNER") || off.getType().name().contains("ARMOR")) {
                 if (getDupe().checkEffectiveTag(off, ItemTag.FINAL) || getDupe().checkEffectiveTag(off, ItemTag.FINAL)) {
                     event.setCancelled(true);
-                    warningAny(player, "That item is final and cannot be modified!");
+                    warningAny(player, dict().itemModificationEvents.modifyFinalItem);
                 }
             }
 
@@ -338,7 +338,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
         for (String finalCommandRegex : getConfig().finalCommandRegex) {
             if (command.matches(finalCommandRegex)) {
                 e.setCancelled(true);
-                warningAny(e.getPlayer(), "That item is final and cannot be modified!");
+                warningAny(e.getPlayer(), dict().itemModificationEvents.modifyFinalItem);
                 return;
             }
         }
@@ -363,11 +363,11 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
         if (getDupe().checkEffectiveTag(item, ItemTag.PROTECTED)) {
             event.setCancelled(true);
-            warningAny(event.getPlayer(), "You cannot place protected items!");
+            warningAny(event.getPlayer(), dict().itemModificationEvents.placeProtectedItem);
         }
         if (item.getItemMeta() instanceof BannerMeta && getDupe().checkEffectiveTag(item, ItemTag.FINAL)) {
             event.setCancelled(true);
-            warningAny(event.getPlayer(), "You cannot place final banners!");
+            warningAny(event.getPlayer(), dict().itemModificationEvents.placeFinalBanner);
         }
     }
 
@@ -378,14 +378,14 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
         if (getDupe().checkEffectiveTag(item, ItemTag.PROTECTED)) {
             event.setCancelled(true);
-            warningAny(event.getPlayer(), "You cannot use protected items!");
+            warningAny(event.getPlayer(), dict().itemModificationEvents.useProtectedItem);
         }
 
         Block targetBlock = event.getPlayer().getTargetBlockExact(4, FluidCollisionMode.ALWAYS);
         if (targetBlock != null && targetBlock.getType() == Material.WATER) {
             if (getDupe().checkEffectiveTag(item, ItemTag.FINAL) && item != null && (item.getType().equals(Material.GLASS_BOTTLE) || item.getType().equals(Material.BUCKET))) {
                 event.setCancelled(true);
-                warningAny(event.getPlayer(), "You cannot fill final items!");
+                warningAny(event.getPlayer(), dict().itemModificationEvents.fillFinalItem);
             }
         }
     }
@@ -397,7 +397,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
         boolean isFinal = getDupe().checkEffectiveTag(item, ItemTag.FINAL);
         boolean isProtected = getDupe().checkEffectiveTag(item, ItemTag.PROTECTED);
         if (isProtected || isFinal) {
-            String message = isFinal ? "You cannot drain final buckets!" : "You cannot drain protected buckets!";
+            String message = isFinal ? dict().itemModificationEvents.drainFinalBucket : dict().itemModificationEvents.drainProtectedBucket;
             warningAny(event.getPlayer(), message);
             event.setCancelled(true);
         }
@@ -410,7 +410,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
         boolean isFinal = getDupe().checkEffectiveTag(item, ItemTag.FINAL);
         boolean isProtected = getDupe().checkEffectiveTag(item, ItemTag.PROTECTED);
         if (isProtected || isFinal) {
-            String message = isFinal ? "You cannot fill final buckets!" : "You cannot fill protected buckets!";
+            String message = isFinal ? dict().itemModificationEvents.fillFinalBucket : dict().itemModificationEvents.fillProtectedBucket;
             warningAny(event.getPlayer(), message);
             event.setCancelled(true);
         }
@@ -423,7 +423,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
         boolean isFinal = getDupe().checkEffectiveTag(item, ItemTag.FINAL);
         boolean isProtected = getDupe().checkEffectiveTag(item, ItemTag.PROTECTED);
         if (isProtected || isFinal) {
-            String message = isFinal ? "You cannot fish with final buckets!" : "You cannot fish with protected buckets!";
+            String message = isFinal ? dict().itemModificationEvents.fishFinalBucket : dict().itemModificationEvents.fishProtectedBucket;
             warningAny(event.getPlayer(), message);
             event.setCancelled(true);
         }
@@ -445,7 +445,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
         if (getDupe().checkEffectiveTag(item, ItemTag.PROTECTED)) {
             event.setCancelled(true);
-            warningAny(event.getPlayer(), "You cannot consume protected items!");
+            warningAny(event.getPlayer(), dict().itemModificationEvents.consumeProtectedItem);
         }
     }
 
@@ -462,7 +462,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
             event.setCancelled(true);
             if (event.getEntity() instanceof Player player) {
                 if (consumable != null) player.getInventory().addItem(consumable);
-                String message = isFinal ? "You cannot use final bows!" : "You cannot shoot protected items!";
+                String message = isFinal ? dict().itemModificationEvents.useFinalBow : dict().itemModificationEvents.shootProtectedItem;
                 warningAny(player, message);
             }
         }
@@ -480,7 +480,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
             if (getDupe().checkEffectiveTag(item, ItemTag.PROTECTED)) {
                 event.setCancelled(true);
-                warningAny(player, "You cannot use protected items!");
+                warningAny(player, dict().itemModificationEvents.useProtectedItem);
             }
         }
     }
@@ -493,7 +493,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
             if (getDupe().checkEffectiveTag(item, ItemTag.PROTECTED)) {
                 event.setCancelled(true);
-                warningAny(player, "You cannot use protected items!");
+                warningAny(player, dict().itemModificationEvents.useProtectedItem);
             }
         }
     }
@@ -506,7 +506,7 @@ public class ItemModificationEvents implements QuickListener, DupeContext {
 
         if (getDupe().checkEffectiveTag(item, ItemTag.PROTECTED)) {
             event.setCancelled(true);
-            warningAny(player, "You cannot use protected items!");
+            warningAny(player, dict().itemModificationEvents.useProtectedItem);
         }
     }
 

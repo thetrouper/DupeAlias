@@ -62,7 +62,7 @@ public class DupeCommand implements QuickCommand, DupeContext {
                 dupeGui.openDefaultGui(player);
             }
         } catch (NumberFormatException e) {
-            warningAny(player,"{0} is not a valid number.", args.get(0).toString());
+            warningAny(player, dict().dupeCommand.invalidNumber, args.get(0).toString());
         }
     }
 
@@ -75,17 +75,17 @@ public class DupeCommand implements QuickCommand, DupeContext {
 
     private boolean verifyDupe(Player player, int amount) {
         if (!player.hasPermission("dupealias.dupe")) {
-            warningAny(player,"You are not allowed to dupe via commands.");
+            warningAny(player, dict().dupeCommand.noPermission);
             return false;
         }
         if (dupeCooldown.isOnCooldown(player.getUniqueId())) {
-            warningAny(player,"You can command dupe again in {0}.", dupeCooldown.formatLong(player.getUniqueId()));
+            warningAny(player, dict().dupeCommand.onCooldown, dupeCooldown.formatLong(player.getUniqueId()));
             return false;
         }
 
         int playerMax = getDupe().getPermissionValue(player,"dupealias.dupe.limit.",Integer.MAX_VALUE,true);
         if (amount > playerMax) {
-            warningAny(player,"Your maximum permitted dupe amplifier is {0}!", playerMax);
+            warningAny(player, dict().dupeCommand.dupeLimitExceeded, playerMax);
             return false;
         }
 
@@ -93,13 +93,13 @@ public class DupeCommand implements QuickCommand, DupeContext {
         ItemStack offHand = player.getInventory().getItemInOffHand();
 
         if (toDupe.isEmpty() && offHand.isEmpty()) {
-            warningAny(player,"You must hold an item to duplicate it with commands.");
+            warningAny(player, dict().dupeCommand.noItemHeld);
             return false;
         }
 
         if (toDupe.isEmpty() || getDupe().isUnique(toDupe)) {
             if (getDupe().isUnique(offHand)) {
-                warningAny(player,"Your {0} is or contains a unique item that cannot be duped!", toDupe.getType());
+                warningAny(player, dict().dupeCommand.uniqueItemWarning, toDupe.getType());
                 return false;
             } else {
                 toDupe = offHand;
@@ -129,13 +129,13 @@ public class DupeCommand implements QuickCommand, DupeContext {
                 batch.setAmount(stackAmt);
 
                 if (!player.getInventory().addItem(batch).isEmpty()) {
-                    infoAny(player,"Your inventory is now full.");
+                    infoAny(player, dict().dupeCommand.inventoryFull);
                     return;
                 }
             }
         }
 
         int totalGiven = baseCount * ((1 << amount) - 1);
-        successAny(player,"You have duplicated {0} items!", totalGiven);
+        successAny(player, dict().dupeCommand.successMessage, totalGiven);
     }
 }

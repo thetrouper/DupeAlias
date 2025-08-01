@@ -1,6 +1,7 @@
 package me.trouper.dupealias.server.gui.dupe.sub;
 
 import me.trouper.alias.server.systems.gui.QuickGui;
+import me.trouper.dupealias.DupeAlias;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -31,7 +32,7 @@ public class DupeChestGui extends AbstractDupeGui<DupeChestGui.ChestSession> {
         private int delayTicks;
 
         public ChestSession(Player owner) {
-            super(owner, "<gradient:#cc22ff:#cc99ff><bold>DUPE CHEST</gradient>", 6);
+            super(owner, DupeAlias.getDupeAlias().getDictionary().guiDupe.guiChest.title, 6);
             this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.chest.refresh.", getConfig().chest.baseRefreshDelayTicks,false);
         }
 

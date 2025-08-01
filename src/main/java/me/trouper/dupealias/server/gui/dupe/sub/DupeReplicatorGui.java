@@ -4,6 +4,8 @@ import me.trouper.alias.server.systems.gui.QuickGui;
 import me.trouper.alias.utils.FormatUtils;
 import me.trouper.alias.utils.ItemBuilder;
 import me.trouper.alias.utils.SoundPlayer;
+import me.trouper.dupealias.DupeAlias;
+import me.trouper.dupealias.DupeContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -13,7 +15,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.ReplicatorSession> {
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.ReplicatorSession> implements DupeContext {
 
     private final int[] inputRing = {1, 2, 3, 12, 21, 20, 19, 10};
     private final int[] outputRing = {5, 6, 7, 16, 25, 24, 23, 14};
@@ -42,11 +47,11 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
         private int delayTicks;
         private int currentDelayTicks = 0;
         private int cooldownTicks;
-        private int currentCooldownTicks = 0; 
+        private int currentCooldownTicks = 0;
         private boolean ready = false;
-        
+
         public ReplicatorSession(Player owner, ItemStack input) {
-            super(owner, "<gradient:#cc22ff:#cc99ff><bold>REPLICATOR</gradient>", 3);
+            super(owner, DupeAlias.getDupeAlias().getDictionary().guiDupe.guiReplicator.title, 3);
             getVerbose().send("Creating a new replicator with input of {0}", input.getType().name());
             setInput(input);
             this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.replicator.refresh.", getConfig().replicator.baseRefreshDelayTicks,false);
@@ -71,11 +76,11 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
                                 e.setCancelled(true);
                                 return;
                             }
-                            
+
                             ready = false;
                             currentDelayTicks = 0;
                             SoundPlayer.play(getOwner(), Sound.ENTITY_ITEM_PICKUP, 0.8F, 1.2F);
-                            
+
                             e.setCancelled(false);
                             return;
                         }
@@ -106,13 +111,13 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
                     .onClose((g, e) -> close())
                     .build();
         }
-        
+
         @Override
         protected void tick() {
             timer++;
-            
+
             Inventory inv = getGui().getInventory();
-            
+
             if (timer % 2 == 0) for (int i = 0; i < outputRing.length; i++) {
                 int currentSlot = outputRing[i];
                 int nextSlot = outputRing[(i+1) % outputRing.length];
@@ -123,7 +128,7 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
                     break;
                 }
             }
-            
+
             ItemStack output = inv.getItem(15);
 
             if (currentCooldownTicks > 1) {
@@ -134,7 +139,7 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
                 getGui().getInventory().setItem(11, createInputItem(input, 1));
                 SoundPlayer.play(getOwner(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1, 0.8F);
             }
-            
+
             if (input == null || input.getType() == Material.AIR) {
                 if (output != null && !output.isSimilar(createPopulatedItem(null,1))) {
                     inv.setItem(15, createPopulatedItem(null,1));
@@ -165,7 +170,7 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
         public boolean setInput(ItemStack newInput) {
             if (getDupe().isUnique(newInput)) {
                 SoundPlayer.play(getOwner(), Sound.ENTITY_VILLAGER_NO, 1, 0.8F);
-                warningAny(getOwner(), "Your {0} is or contains a unique item!", FormatUtils.formatEnum(newInput.getType()));
+                warningAny(getOwner(), dict().guiDupe.guiReplicator.uniqueItemWarning, FormatUtils.formatEnum(newInput.getType()));
                 getGui().getInventory().setItem(11, createInputItem(this.input, 1));
                 return false;
             }
@@ -205,22 +210,22 @@ public class DupeReplicatorGui extends AbstractDupeGui<DupeReplicatorGui.Replica
     private ItemStack createInputItem(ItemStack input, double cooldownProgress) {
         if (cooldownProgress < 1) {
             return ItemBuilder.of(EMPTY(Material.BARRIER))
-                    .displayName("<gold>Replicator Input")
+                    .displayName(dict().guiDupe.guiReplicator.inputItemDisplayName)
                     .loreComponent(getTextSystem().createProgressBar(cooldownProgress, '|',30, TextColor.color(0xFF895A),TextColor.color(0x6F6F6F)))
-                    .loreComponent(Component.text("Replicator input on cooldown.", NamedTextColor.DARK_RED))
+                    .loreMiniMessage(dict().guiDupe.guiReplicator.inputItemLoreCooldown)
                     .build();
         }
         if (input == null || input.getType() == Material.AIR) {
             return ItemBuilder.headOfTexture("http://textures.minecraft.net/texture/86bd920b402815ad89018df82977be9f7ea19e799ecf016f7f0da4ab47ca23c5")
-                    .displayName("<gold>Replicator Input")
-                    .loreMiniMessage("<gray>No item selected.")
-                    .loreMiniMessage("<dark_red>Drag an item into this slot.")
+                    .displayName(dict().guiDupe.guiReplicator.inputItemDisplayName)
+                    .loreMiniMessage(dict().guiDupe.guiReplicator.inputItemLoreNoItemSelected)
                     .build();
         } else {
             return ItemBuilder.headOfTexture("http://textures.minecraft.net/texture/32d250f5336449b32bfe990bdfd307a1b39ae5ca07e9a1593b1bb6ed33ec14ba")
-                    .displayName("<gold>Replicator Input")
-                    .loreMiniMessage("<white>Set Item: " + FormatUtils.formatEnum(input.getType()))
-                    .loreMiniMessage("<dark_green>Replication Ready!")
+                    .displayName(dict().guiDupe.guiReplicator.inputItemDisplayName)
+                    .loreMiniMessage(dict().guiDupe.guiReplicator.inputItemLoreItemSelected.stream()
+                            .map(line->line.replace("{0}", FormatUtils.formatEnum(input.getType())))
+                            .toList())
                     .build();
         }
     }

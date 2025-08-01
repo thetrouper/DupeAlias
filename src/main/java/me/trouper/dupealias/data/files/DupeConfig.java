@@ -40,8 +40,6 @@ public class DupeConfig implements JsonSerializable<DupeConfig>, DupeContext {
             ItemTag.INFINITE, "<dark_green><bold>|</bold><green> Finite"
     ));
 
-    public boolean blockDupePlus = false;
-    
     public List<GlobalRule> globalRules = new ArrayList<>();
     
     public Replicator replicator = new Replicator();

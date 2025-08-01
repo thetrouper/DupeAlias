@@ -44,7 +44,7 @@ public class InfiniteItemEvents implements QuickListener, DupeContext {
             stack.setItemMeta(stackMeta);
             e.getItemDrop().setItemStack(stack);
         } else {
-            infoAny(player,"You have dropped your infinite {0}!", FormatUtils.formatEnum(stack.getType()));
+            infoAny(player,dict().itemModificationEvents.dropInfiniteItem, FormatUtils.formatEnum(stack.getType()));
         }
 
     }

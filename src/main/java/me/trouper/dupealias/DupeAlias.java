@@ -4,6 +4,7 @@ import me.trouper.alias.AliasContext;
 import me.trouper.alias.AliasContextProvider;
 import me.trouper.alias.data.Common;
 import me.trouper.dupealias.data.files.CommonConfig;
+import me.trouper.dupealias.data.files.Dictionary;
 import me.trouper.dupealias.data.files.DupeConfig;
 import me.trouper.dupealias.server.DupeManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,6 +59,10 @@ public final class DupeAlias extends JavaPlugin {
 
     public DupeConfig getDupeConfig() {
         return alias.getDataManager().get(DupeConfig.class);
+    }
+
+    public Dictionary getDictionary() {
+        return alias.getDataManager().get(Dictionary.class);
     }
 
     public DupeManager getDupe() {
