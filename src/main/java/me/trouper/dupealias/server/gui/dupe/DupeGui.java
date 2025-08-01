@@ -8,9 +8,6 @@ import me.trouper.dupealias.server.gui.dupe.sub.AbstractDupeGui;
 import me.trouper.dupealias.server.gui.dupe.sub.DupeChestGui;
 import me.trouper.dupealias.server.gui.dupe.sub.DupeInventoryGui;
 import me.trouper.dupealias.server.gui.dupe.sub.DupeReplicatorGui;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -23,20 +20,20 @@ public class DupeGui implements DupeContext, CommonItems {
 
     public void openMainGui(Player player) {
         if (!player.hasPermission("dupealias.gui")) {
-            warningAny(player,"You do not have permission to use the main dupe gui.");
+            warningAny(player,dict().guiDupe.noPermission);
             return;
         }
 
         QuickGui gui = QuickGui.create()
                 .rows(5)
-                .titleMini("<aqua><bold>Available GUIs")
+                .titleMini(dict().guiDupe.title)
                 .item(20,
                         permissionItem(
                                 player,
                                 "dupealias.gui.replicator",
                                 ItemBuilder.of(Material.DISPENSER)
-                                .displayName("<blue>Replicator GUI")
-                                .loreMiniMessage("<gray>Open the single-item dupe GUI.")
+                                .displayName(dict().guiDupe.replicatorName)
+                                .loreMiniMessage(dict().guiDupe.replicatorLore)
                         ),
                         openSession(replicatorGui,"dupealias.gui.replicator"))
 
@@ -44,8 +41,8 @@ public class DupeGui implements DupeContext, CommonItems {
                         player,
                                 "dupealias.gui.inventory",
                                 ItemBuilder.of(Material.NETHERITE_CHESTPLATE)
-                                .displayName("<yellow>Inventory GUI")
-                                .loreMiniMessage("<gray>Open a mirror of your own inventory.")
+                                .displayName(dict().guiDupe.inventoryName)
+                                .loreMiniMessage(dict().guiDupe.inventoryLore)
                         ),
                         openSession(inventoryGui,"dupealias.gui.inventory"))
 
@@ -53,8 +50,8 @@ public class DupeGui implements DupeContext, CommonItems {
                         player,
                         "dupealias.gui.chest",
                                 ItemBuilder.of(Material.ENDER_CHEST)
-                                        .displayName("<green>Chest GUI")
-                                        .loreMiniMessage("<gray>Open the multi-item dupe GUI.")
+                                        .displayName(dict().guiDupe.chestName)
+                                        .loreMiniMessage(dict().guiDupe.chestLore)
                         ),
                         openSession(chestGui,"dupealias.gui.chest"))
 
@@ -69,11 +66,13 @@ public class DupeGui implements DupeContext, CommonItems {
         if (player.hasPermission(permission)) {
             return builder.build();
         } else {
-            Component name = builder.build().effectiveName();
-            return builder.displayName("<dark_red>Unavailable GUI")
-                    .loreMiniMessage()
-                    .loreComponent(Component.text("You lack the permission to",NamedTextColor.RED),Component.text("use the ", NamedTextColor.RED).decoration(TextDecoration.ITALIC,false).append(name).append(Component.text(".")))
-                    .build().withType(Material.BARRIER);
+            return builder.displayName(dict().guiDupe.noDupeGuiName)
+                    .loreMiniMessage(
+                            dict().guiDupe.noDupeGuiLore
+                                    .stream()
+                                    .map(line->line.replace("{0}",permission.replace("dupealias.gui.","")))
+                                    .toList()
+                    ).build().withType(Material.BARRIER);
         }
     }
 
@@ -94,7 +93,7 @@ public class DupeGui implements DupeContext, CommonItems {
             }
         } else {
             player.closeInventory();
-            warningAny(player,"You do not have permission to use that GUI.");
+            warningAny(player,dict().guiDupe.noSpecificPermission);
         }
     }
 
@@ -105,7 +104,7 @@ public class DupeGui implements DupeContext, CommonItems {
             case "CHEST" -> openIfPermission(player,chestGui,"dupealias.gui.chest");
             case "MENU" -> openMainGui(player);
             default -> {
-                infoAny(player,"There is currently no default Dupe GUI.");
+                infoAny(player,dict().guiDupe.noDefaultGui);
             }
         }
     }

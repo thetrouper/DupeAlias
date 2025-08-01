@@ -20,21 +20,34 @@ import java.util.List;
 
 public class DupeManager implements DupeContext {
 
+
+    /**
+     * Runs a recursive check on the item to see if it is tagged as UNIQUE.
+     */
     public boolean isUnique(ItemStack item) {
         if (item == null || item.isEmpty()) return false;
         return !new UniqueCheck().passes(item);
     }
 
+    /**
+     * Checks if the input item has the requested tag.
+     */
     public boolean hasIndividualTag(ItemStack input, ItemTag tag) {
         return input.hasItemMeta() && input.getPersistentDataContainer().has(tag.getKey());
     }
 
+    /**
+     * Checks the value of the individual tag. Throws IllegalArgumentException if the item does not have the tag.
+     */
     public boolean checkIndividualTag(ItemStack input, ItemTag tag) {
         boolean set = hasIndividualTag(input,tag);
         if (!set) throw new IllegalArgumentException("Tried to check a tag which was not set, this may produce unexpected behavior!");
         return Boolean.TRUE.equals(input.getPersistentDataContainer().get(tag.getKey(), PersistentDataType.BOOLEAN));
     }
 
+    /**
+     * Compares individual and global rules to see if the selected tag is applicable for the item.
+     */
     public boolean checkEffectiveTag(ItemStack input, ItemTag tag) {
         if (tag == null || input == null) return false;
         if (input.isEmpty()) return false;
@@ -42,10 +55,8 @@ public class DupeManager implements DupeContext {
         boolean set = hasIndividualTag(input,tag);
         boolean individual = set && Boolean.TRUE.equals(input.getPersistentDataContainer().get(tag.getKey(), PersistentDataType.BOOLEAN));
 
-        // Check individual tag first
         if (set) return individual;
 
-        // Check global rules
         return checkGlobalRuleTag(input, tag);
     }
 
@@ -143,6 +154,9 @@ public class DupeManager implements DupeContext {
         return true;
     }
 
+    /**
+     * Adds the selected tag to the item, updating its lore too.
+     */
     public boolean addTag(ItemStack item, ItemTag tag) {
         if (hasIndividualTag(item, tag) && getDupe().checkIndividualTag(item, tag)) return false;
 
@@ -158,6 +172,9 @@ public class DupeManager implements DupeContext {
         return true;
     }
 
+    /**
+     * Removes the selected tag from the item, updating its lore too.
+     */
     public boolean removeTag(ItemStack item, ItemTag tag) {
         ItemBuilder builder = ItemBuilder.of(item);
 
@@ -185,6 +202,10 @@ public class DupeManager implements DupeContext {
         return true;
     }
 
+
+    /**
+     * Sets the selected tag to the exact value, updating the lore too.
+     */
     public void setTag(ItemStack item, ItemTag tag, boolean value) {
         ItemBuilder builder = ItemBuilder.of(item);
 
@@ -210,6 +231,9 @@ public class DupeManager implements DupeContext {
         item.setItemMeta(result.getItemMeta());
     }
 
+    /**
+     * Removes the selected tag from the item meta and lore.
+     */
     public void removeTagLore(ItemMeta meta, ItemTag tag) {
         List<Component> lore = meta.lore();
         if (lore != null) {
@@ -232,13 +256,9 @@ public class DupeManager implements DupeContext {
         }
     }
 
-    public ItemTag getTag(NamespacedKey key) {
-        for (ItemTag value : ItemTag.values()) {
-            if (value.getKey().equals(key)) return value;
-        }
-        throw new IllegalArgumentException("Invalid NameSpacedKey '%s'".formatted(key.value()));
-    }
-
+    /**
+     * Checks the player's permission from the root node (ending in a dot), taking the highest or lowest value found.
+     */
     public int getPermissionValue(Player player, String rootPermission, int fallback, boolean takeHighest) {
         int result = takeHighest ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 

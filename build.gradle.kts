@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "me.trouper.dupealias"
-version = "0.0.1"
+version = "0.0.2"
 description = "A powerful dupe plugin with niche features for servers looking to stand out."
 
 java {

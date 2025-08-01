@@ -1,6 +1,7 @@
 package me.trouper.dupealias.server.gui.dupe.sub;
 
 import me.trouper.alias.server.systems.gui.QuickGui;
+import me.trouper.dupealias.DupeAlias;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -28,7 +29,7 @@ public class DupeInventoryGui extends AbstractDupeGui<DupeInventoryGui.Inventory
         private int delayTicks;
 
         public InventorySession(Player owner) {
-            super(owner, "<gradient:#cc22ff:#cc99ff><bold>YOUR INVENTORY</gradient>", 6);
+            super(owner, DupeAlias.getDupeAlias().getDictionary().guiDupe.guiInventory.title, 6);
             this.delayTicks = getDupe().getPermissionValue(owner, "dupealias.gui.inventory.refresh.", getConfig().inventory.baseRefreshDelayTicks,false);
         }
 
